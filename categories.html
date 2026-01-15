@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categories - Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <div class="layout-wrapper">
+        <aside class="layout-menu">
+            <div class="app-brand">
+                <a href="index.html" class="app-brand-logo">
+                    <i class="fas fa-cube"></i>
+                    <span>Admin Panel</span>
+                </a>
+                <button class="sidebar-toggle-btn" id="sidebarToggle">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="menu-inner">
+                <ul class="menu-inner-list">
+                    <li class="menu-header">Main</li>
+                    
+                    <li class="menu-item">
+                        <a href="index.html" class="menu-link">
+                            <i class="menu-icon fas fa-home"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-header">Content Management</li>
+
+                    <li class="menu-item has-sub open">
+                        <a href="#" class="menu-link">
+                            <i class="menu-icon fas fa-folder"></i>
+                            <span>Categories</span>
+                            <i class="menu-toggle fas fa-chevron-right"></i>
+                        </a>
+                        <ul class="menu-sub">
+                            <li class="menu-item">
+                                <a href="categories.html" class="menu-link active">
+                                    <span>All Categories</span>
+                                </a>
+                            </li>
+                            <li class="menu-item">
+                                <a href="categories-add.html" class="menu-link">
+                                    <span>Add Category</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="menu-item has-sub">
+                        <a href="#" class="menu-link">
+                            <i class="menu-icon fas fa-newspaper"></i>
+                            <span>News</span>
+                            <i class="menu-toggle fas fa-chevron-right"></i>
+                        </a>
+                        <ul class="menu-sub">
+                            <li class="menu-item">
+                                <a href="news.html" class="menu-link">
+                                    <span>All News</span>
+                                </a>
+                            </li>
+                            <li class="menu-item">
+                                <a href="news-add.html" class="menu-link">
+                                    <span>Add News</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="menu-header">System</li>
+
+                    <li class="menu-item">
+                        <a href="settings.html" class="menu-link">
+                            <i class="menu-icon fas fa-cog"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item">
+                        <a href="profile.html" class="menu-link">
+                            <i class="menu-icon fas fa-user"></i>
+                            <span>Profile</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="menu-icon fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <div class="layout-page">
+            <nav class="layout-navbar">
+                <div class="navbar-content">
+                    <div class="navbar-left">
+                        <div class="tech-support">
+                            <a href="https://wa.me/" target="_blank" class="tech-support-link" title="WhatsApp Support">
+                                <i class="fab fa-whatsapp"></i>
+                            </a>
+                            <a href="https://t.me/" target="_blank" class="tech-support-link" title="Telegram Support">
+                                <i class="fab fa-telegram"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <button class="theme-toggle" id="themeToggle">
+                                <i class="fas fa-moon"></i>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <a href="profile.html" class="user-avatar">
+                                <span>AD</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <div class="content-wrapper">
+                <div class="container-fluid">
+                    <div class="page-header">
+                        <h1 class="page-title">Categories</h1>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+                                <li class="breadcrumb-item active">Categories</li>
+                            </ol>
+                        </nav>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title">All Categories</h5>
+                            <a href="categories-add.html" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Add Category
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <div id="categoryList">
+                                <div class="category-item" data-id="1">
+                                    <div class="category-info">
+                                        <i class="fas fa-grip-vertical drag-handle"></i>
+                                        <span><strong>Technology</strong> (ID: 1)</span>
+                                    </div>
+                                    <div class="category-actions">
+                                        <button class="btn btn-sm btn-primary" onclick="editCategory(1)">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteCategory(1)">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="category-item child" data-id="2" data-parent="1">
+                                    <div class="category-info">
+                                        <i class="fas fa-grip-vertical drag-handle"></i>
+                                        <span><strong>Software</strong> (ID: 2) - Child of Technology</span>
+                                    </div>
+                                    <div class="category-actions">
+                                        <button class="btn btn-sm btn-primary" onclick="editCategory(2)">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteCategory(2)">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="category-item child" data-id="3" data-parent="1">
+                                    <div class="category-info">
+                                        <i class="fas fa-grip-vertical drag-handle"></i>
+                                        <span><strong>Hardware</strong> (ID: 3) - Child of Technology</span>
+                                    </div>
+                                    <div class="category-actions">
+                                        <button class="btn btn-sm btn-primary" onclick="editCategory(3)">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteCategory(3)">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="category-item" data-id="4">
+                                    <div class="category-info">
+                                        <i class="fas fa-grip-vertical drag-handle"></i>
+                                        <span><strong>Business</strong> (ID: 4)</span>
+                                    </div>
+                                    <div class="category-actions">
+                                        <button class="btn btn-sm btn-primary" onclick="editCategory(4)">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteCategory(4)">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="category-item" data-id="5">
+                                    <div class="category-info">
+                                        <i class="fas fa-grip-vertical drag-handle"></i>
+                                        <span><strong>Sports</strong> (ID: 5)</span>
+                                    </div>
+                                    <div class="category-actions">
+                                        <button class="btn btn-sm btn-primary" onclick="editCategory(5)">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteCategory(5)">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="editCategoryModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="editCategoryForm">
+                        <div class="mb-3">
+                            <label class="form-label">Category Name</label>
+                            <input type="text" class="form-control" id="editCategoryName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Slug</label>
+                            <input type="text" class="form-control" id="editCategorySlug" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Parent Category</label>
+                            <select class="form-select" id="editCategoryParent">
+                                <option value="">None (Main Category)</option>
+                                <option value="1">Technology</option>
+                                <option value="4">Business</option>
+                                <option value="5">Sports</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Meta Title</label>
+                            <input type="text" class="form-control" id="editCategoryMetaTitle">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Meta Description</label>
+                            <textarea class="form-control" id="editCategoryMetaDesc" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveCategoryEdit()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/categories.js"></script>
+</body>
+</html>

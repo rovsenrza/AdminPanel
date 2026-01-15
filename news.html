@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News - Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <div class="layout-wrapper">
+        <aside class="layout-menu">
+            <div class="app-brand">
+                <a href="index.html" class="app-brand-logo">
+                    <i class="fas fa-cube"></i>
+                    <span>Admin Panel</span>
+                </a>
+                <button class="sidebar-toggle-btn" id="sidebarToggle">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="menu-inner">
+                <ul class="menu-inner-list">
+                    <li class="menu-header">Main</li>
+                    
+                    <li class="menu-item">
+                        <a href="index.html" class="menu-link">
+                            <i class="menu-icon fas fa-home"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-header">Content Management</li>
+
+                    <li class="menu-item has-sub">
+                        <a href="#" class="menu-link">
+                            <i class="menu-icon fas fa-folder"></i>
+                            <span>Categories</span>
+                            <i class="menu-toggle fas fa-chevron-right"></i>
+                        </a>
+                        <ul class="menu-sub">
+                            <li class="menu-item">
+                                <a href="categories.html" class="menu-link">
+                                    <span>All Categories</span>
+                                </a>
+                            </li>
+                            <li class="menu-item">
+                                <a href="categories-add.html" class="menu-link">
+                                    <span>Add Category</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="menu-item has-sub open">
+                        <a href="#" class="menu-link">
+                            <i class="menu-icon fas fa-newspaper"></i>
+                            <span>News</span>
+                            <i class="menu-toggle fas fa-chevron-right"></i>
+                        </a>
+                        <ul class="menu-sub">
+                            <li class="menu-item">
+                                <a href="news.html" class="menu-link active">
+                                    <span>All News</span>
+                                </a>
+                            </li>
+                            <li class="menu-item">
+                                <a href="news-add.html" class="menu-link">
+                                    <span>Add News</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="menu-header">System</li>
+
+                    <li class="menu-item">
+                        <a href="settings.html" class="menu-link">
+                            <i class="menu-icon fas fa-cog"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item">
+                        <a href="profile.html" class="menu-link">
+                            <i class="menu-icon fas fa-user"></i>
+                            <span>Profile</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="menu-icon fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <div class="layout-page">
+            <nav class="layout-navbar">
+                <div class="navbar-content">
+                    <div class="navbar-left">
+                        <div class="tech-support">
+                            <a href="https://wa.me/" target="_blank" class="tech-support-link" title="WhatsApp Support">
+                                <i class="fab fa-whatsapp"></i>
+                            </a>
+                            <a href="https://t.me/" target="_blank" class="tech-support-link" title="Telegram Support">
+                                <i class="fab fa-telegram"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <button class="theme-toggle" id="themeToggle">
+                                <i class="fas fa-moon"></i>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <a href="profile.html" class="user-avatar">
+                                <span>AD</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <div class="content-wrapper">
+                <div class="container-fluid">
+                    <div class="page-header">
+                        <h1 class="page-title">News</h1>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+                                <li class="breadcrumb-item active">News</li>
+                            </ol>
+                        </nav>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title">All News</h5>
+                            <a href="news-add.html" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Add News
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Image</th>
+                                            <th>Title</th>
+                                            <th>Category</th>
+                                            <th>Status</th>
+                                            <th>Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>#001</td>
+                                            <td>
+                                                <img src="https://via.placeholder.com/50" alt="News" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                                            </td>
+                                            <td>Latest Technology Trends in 2024</td>
+                                            <td><span class="badge badge-primary">Technology</span></td>
+                                            <td><span class="badge badge-success">Published</span></td>
+                                            <td>2024-01-15</td>
+                                            <td>
+                                                <a href="news-add.html?id=1" class="btn btn-sm btn-primary btn-icon">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button class="btn btn-sm btn-danger btn-icon" onclick="deleteNews(1)">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>#002</td>
+                                            <td>
+                                                <img src="https://via.placeholder.com/50" alt="News" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                                            </td>
+                                            <td>Business Growth Strategies</td>
+                                            <td><span class="badge badge-warning">Business</span></td>
+                                            <td><span class="badge badge-success">Published</span></td>
+                                            <td>2024-01-14</td>
+                                            <td>
+                                                <a href="news-add.html?id=2" class="btn btn-sm btn-primary btn-icon">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button class="btn btn-sm btn-danger btn-icon" onclick="deleteNews(2)">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>#003</td>
+                                            <td>
+                                                <img src="https://via.placeholder.com/50" alt="News" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                                            </td>
+                                            <td>Sports Championship Finals</td>
+                                            <td><span class="badge badge-success">Sports</span></td>
+                                            <td><span class="badge badge-secondary">Draft</span></td>
+                                            <td>2024-01-13</td>
+                                            <td>
+                                                <a href="news-add.html?id=3" class="btn btn-sm btn-primary btn-icon">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button class="btn btn-sm btn-danger btn-icon" onclick="deleteNews(3)">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script>
+        function deleteNews(id) {
+            if (confirmDelete('Are you sure you want to delete this news?')) {
+                console.log('Deleting news:', id);
+                showAlert('News deleted successfully!', 'success');
+            }
+        }
+    </script>
+</body>
+</html>
