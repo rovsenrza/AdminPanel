@@ -181,7 +181,22 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="assets/js/main.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', loadNews);
+        let categories = [];
+        
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadCategories();
+            await loadNews();
+        });
+        
+        async function loadCategories() {
+            try {
+                const res = await fetch('/backend/api/categories', { credentials: 'include' });
+                const data = await res.json();
+                categories = data.items || [];
+            } catch (err) {
+                console.error('Failed to load categories:', err);
+            }
+        }
         
         async function loadNews() {
             const tbody = document.getElementById('newsTableBody');
@@ -198,6 +213,17 @@
                 
                 tbody.innerHTML = news.map(item => {
                     const imgSrc = item.images && item.images[0] ? item.images[0].path : '';
+                    // Show multiple categories if category_ids exists
+                    let categoryBadges = '<span class="badge badge-secondary">Uncategorized</span>';
+                    if (item.category_ids) {
+                        const catIds = item.category_ids.split(',').map(id => parseInt(id.trim()));
+                        categoryBadges = catIds.map(catId => {
+                            const cat = categories.find(c => c.id === catId);
+                            return cat ? `<span class="badge badge-primary me-1">${escapeHtml(cat.name)}</span>` : '';
+                        }).join('');
+                    } else if (item.category_name) {
+                        categoryBadges = `<span class="badge badge-primary">${escapeHtml(item.category_name)}</span>`;
+                    }
                     return `
                         <tr>
                             <td>#${String(item.id).padStart(3, '0')}</td>
@@ -205,7 +231,7 @@
                                 ${imgSrc ? `<img src="${imgSrc}" alt="News" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">` : '<span class="text-muted">No image</span>'}
                             </td>
                             <td>${escapeHtml(item.title)}</td>
-                            <td><span class="badge badge-primary">${escapeHtml(item.category_name || 'Uncategorized')}</span></td>
+                            <td>${categoryBadges}</td>
                             <td><span class="badge ${item.published ? 'badge-success' : 'badge-secondary'}">${item.published ? 'Published' : 'Draft'}</span></td>
                             <td>${item.created_at ? item.created_at.split(' ')[0] : '-'}</td>
                             <td>

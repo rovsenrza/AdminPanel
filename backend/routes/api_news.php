@@ -7,7 +7,15 @@ require_auth();
 $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
 
 if ($method === 'GET') {
-    $rows = db()->query('SELECT * FROM news ORDER BY id DESC')->fetchAll();
+    $rows = db()->query('SELECT n.*, c.name as category_name FROM news n LEFT JOIN categories c ON n.category_id = c.id ORDER BY n.id DESC')->fetchAll();
+    
+    // Attach images to each news item
+    foreach ($rows as &$row) {
+        $imgStmt = db()->prepare('SELECT id, path, sort_order FROM news_images WHERE news_id = ? ORDER BY sort_order ASC');
+        $imgStmt->execute([$row['id']]);
+        $row['images'] = $imgStmt->fetchAll();
+    }
+    
     json_response(['items' => $rows]);
 }
 
@@ -19,9 +27,12 @@ if ($method === 'POST') {
     if ($title === '') json_response(['error' => 'title is required'], 422);
     if ($categoryId <= 0) json_response(['error' => 'category_id is required'], 422);
 
-    $stmt = db()->prepare('INSERT INTO news (category_id, title, slug, short_desc_html, full_desc_html, video_url, published, meta_title, meta_description, meta_keywords) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    $categoryIds = trim((string)($payload['category_ids'] ?? (string)$categoryId));
+    
+    $stmt = db()->prepare('INSERT INTO news (category_id, category_ids, title, slug, short_desc_html, full_desc_html, video_url, published, meta_title, meta_description, meta_keywords) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     $stmt->execute([
         $categoryId,
+        $categoryIds,
         $title,
         (string)($payload['slug'] ?? ''),
         (string)($payload['short_desc_html'] ?? ''),
@@ -40,9 +51,13 @@ if ($method === 'PUT') {
     $id = (int)($_GET['id'] ?? 0);
     if ($id <= 0) json_response(['error' => 'id is required'], 422);
 
-    $stmt = db()->prepare('UPDATE news SET category_id=?, title=?, slug=?, short_desc_html=?, full_desc_html=?, video_url=?, published=?, meta_title=?, meta_description=?, meta_keywords=? WHERE id=?');
+    $categoryId = (int)($payload['category_id'] ?? 0);
+    $categoryIds = trim((string)($payload['category_ids'] ?? (string)$categoryId));
+    
+    $stmt = db()->prepare('UPDATE news SET category_id=?, category_ids=?, title=?, slug=?, short_desc_html=?, full_desc_html=?, video_url=?, published=?, meta_title=?, meta_description=?, meta_keywords=? WHERE id=?');
     $stmt->execute([
-        (int)($payload['category_id'] ?? 0),
+        $categoryId,
+        $categoryIds,
         (string)($payload['title'] ?? ''),
         (string)($payload['slug'] ?? ''),
         (string)($payload['short_desc_html'] ?? ''),

@@ -4,14 +4,121 @@ let extraFieldCounter = 0;
 let imagePreviews = [];
 let existingSlugs = [];
 let categories = [];
+let editMode = false;
+let editNewsId = null;
+let existingImages = [];
 
 function boot() {
+    // Check if we're in edit mode
+    const urlParams = new URLSearchParams(window.location.search);
+    const newsId = urlParams.get('id');
+    if (newsId) {
+        editMode = true;
+        editNewsId = parseInt(newsId);
+        // Update page title
+        const pageTitle = document.querySelector('.page-title');
+        if (pageTitle) pageTitle.textContent = 'Edit News';
+        const breadcrumbActive = document.querySelector('.breadcrumb-item.active');
+        if (breadcrumbActive) breadcrumbActive.textContent = 'Edit News';
+        document.title = 'Edit News - Admin Panel';
+    }
+    
     // Always attempt to load categories first
     loadCategories();
-    // Don’t let editor/form errors block category loading
+    // Don't let editor/form errors block category loading
     try { initEditors(); } catch (e) { console.error('initEditors failed:', e); }
     try { initForm(); } catch (e) { console.error('initForm failed:', e); }
     try { initSlugGeneration(); } catch (e) { console.error('initSlugGeneration failed:', e); }
+    
+    // Load existing news if in edit mode
+    if (editMode) {
+        loadNewsForEdit(editNewsId);
+    }
+}
+
+async function loadNewsForEdit(newsId) {
+    try {
+        const res = await fetch('/backend/api/news', { credentials: 'include' });
+        const data = await res.json();
+        const allNews = data.items || [];
+        const news = allNews.find(n => n.id === newsId);
+        
+        if (!news) {
+            showAlert('News not found', 'danger');
+            return;
+        }
+        
+        // Populate form fields
+        document.getElementById('newsTitle').value = news.title || '';
+        document.getElementById('newsSlug').value = news.slug || '';
+        document.getElementById('videoUrl').value = news.video_url || '';
+        document.getElementById('publishStatus').checked = !!news.published;
+        document.getElementById('newsMetaTitle').value = news.meta_title || '';
+        document.getElementById('newsMetaDesc').value = news.meta_description || '';
+        document.getElementById('newsMetaKeywords').value = news.meta_keywords || '';
+        
+        // Set category after categories are loaded
+        setTimeout(() => {
+            const categorySelect = document.getElementById('newsCategory');
+            if (categorySelect && news.category_ids) {
+                // Multi-category support
+                const catIds = news.category_ids.split(',').map(id => parseInt(id.trim()));
+                Array.from(categorySelect.options).forEach(opt => {
+                    opt.selected = catIds.includes(parseInt(opt.value));
+                });
+            } else if (categorySelect && news.category_id) {
+                categorySelect.value = news.category_id;
+            }
+        }, 500);
+        
+        // Set editor content after editors are initialized
+        setTimeout(() => {
+            if (shortDescriptionEditor && news.short_desc_html) {
+                shortDescriptionEditor.root.innerHTML = news.short_desc_html;
+            }
+            if (fullDescriptionEditor && news.full_desc_html) {
+                fullDescriptionEditor.root.innerHTML = news.full_desc_html;
+            }
+        }, 300);
+        
+        // Load existing images
+        if (news.images && news.images.length > 0) {
+            existingImages = news.images;
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            if (previewContainer) {
+                news.images.forEach(img => {
+                    const previewDiv = document.createElement('div');
+                    previewDiv.className = 'image-preview existing-image';
+                    previewDiv.setAttribute('data-image-id', img.id);
+                    previewDiv.innerHTML = `
+                        <img src="${img.path}" alt="Preview">
+                        <button type="button" class="image-preview-remove" onclick="removeExistingImage(${img.id}, this)">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    previewContainer.appendChild(previewDiv);
+                });
+            }
+        }
+    } catch (err) {
+        console.error('Failed to load news for edit:', err);
+        showAlert('Failed to load news data', 'danger');
+    }
+}
+
+window.removeExistingImage = async function(imageId, button) {
+    try {
+        const res = await fetch(`/backend/api/news/images?id=${imageId}`, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+        if (res.ok) {
+            button.closest('.image-preview').remove();
+            existingImages = existingImages.filter(img => img.id !== imageId);
+        }
+    } catch (err) {
+        console.error('Failed to remove image:', err);
+    }
 }
 
 if (document.readyState === 'loading') {
@@ -24,17 +131,28 @@ async function loadCategories() {
     const select = document.getElementById('newsCategory');
     if (!select) return;
     
-    select.innerHTML = '<option value="">Loading categories...</option>';
+    // For multi-select, don't add empty option
+    const isMultiple = select.hasAttribute('multiple');
+    
+    if (!isMultiple) {
+        select.innerHTML = '<option value="">Loading categories...</option>';
+    } else {
+        select.innerHTML = '';
+    }
     
     try {
         const res = await fetch('/backend/api/categories', { credentials: 'include' });
         const data = await res.json();
         categories = data.items || [];
         
-        select.innerHTML = '<option value="">Select Category</option>';
+        if (!isMultiple) {
+            select.innerHTML = '<option value="">Select Category</option>';
+        } else {
+            select.innerHTML = '';
+        }
         
         if (categories.length === 0) {
-            select.innerHTML = '<option value="">No categories available</option>';
+            select.innerHTML = '<option value="" disabled>No categories available</option>';
             return;
         }
         
@@ -48,7 +166,7 @@ async function loadCategories() {
             addChildCategoryOptions(select, cat.id, sorted, 1);
         });
     } catch (err) {
-        select.innerHTML = '<option value="">Failed to load categories</option>';
+        select.innerHTML = '<option value="" disabled>Failed to load categories</option>';
         console.error('Failed to load categories:', err);
     }
 }
@@ -108,31 +226,55 @@ function initForm() {
         e.preventDefault();
         
         const title = document.getElementById('newsTitle').value.trim();
-        const categoryId = parseInt(document.getElementById('newsCategory').value);
+        const categorySelect = document.getElementById('newsCategory');
         const shortDesc = shortDescriptionEditor.root.innerText;
         const fullDesc = fullDescriptionEditor.root.innerText;
         
-        if (!title || !categoryId) {
-            showAlert('Please fill in required fields', 'danger');
+        // Get selected categories (supports multiple)
+        let selectedCategories = [];
+        if (categorySelect.multiple) {
+            selectedCategories = Array.from(categorySelect.selectedOptions).map(opt => parseInt(opt.value)).filter(v => v > 0);
+        } else {
+            const catId = parseInt(categorySelect.value);
+            if (catId > 0) selectedCategories = [catId];
+        }
+        
+        if (!title || selectedCategories.length === 0) {
+            showAlert('Please fill in required fields (title and at least one category)', 'danger');
             return;
         }
         
+        // Auto-generate meta fields if empty
+        const metaTitle = document.getElementById('newsMetaTitle').value.trim() || title;
+        const metaDesc = document.getElementById('newsMetaDesc').value.trim() || shortDesc.substring(0, 160);
+        const metaKeywords = document.getElementById('newsMetaKeywords').value.trim() || extractKeywords(title + ' ' + shortDesc + ' ' + fullDesc);
+        
         const newsData = {
             title: title,
-            slug: document.getElementById('newsSlug').value.trim(),
-            category_id: categoryId,
+            slug: document.getElementById('newsSlug').value.trim() || generateSlug(title),
+            category_id: selectedCategories[0], // Primary category for backward compatibility
+            category_ids: selectedCategories.join(','), // All selected categories
             short_desc_html: shortDescriptionEditor.root.innerHTML,
             full_desc_html: fullDescriptionEditor.root.innerHTML,
             video_url: document.getElementById('videoUrl').value.trim(),
             published: document.getElementById('publishStatus').checked,
-            meta_title: document.getElementById('newsMetaTitle').value.trim() || title,
-            meta_description: document.getElementById('newsMetaDesc').value.trim() || shortDesc.substring(0, 160),
-            meta_keywords: document.getElementById('newsMetaKeywords').value.trim() || extractKeywords(title + ' ' + shortDesc + ' ' + fullDesc)
+            meta_title: metaTitle,
+            meta_description: metaDesc,
+            meta_keywords: metaKeywords
         };
         
         try {
-            const res = await fetch('/backend/api/news', {
-                method: 'POST',
+            let url = '/backend/api/news';
+            let method = 'POST';
+            
+            // Use PUT method for editing existing news
+            if (editMode && editNewsId) {
+                url = `/backend/api/news?id=${editNewsId}`;
+                method = 'PUT';
+            }
+            
+            const res = await fetch(url, {
+                method: method,
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newsData)
@@ -140,18 +282,20 @@ function initForm() {
             
             if (res.ok) {
                 const data = await res.json();
-                const newsId = data.id;
+                const newsId = editMode ? editNewsId : data.id;
                 
+                // Upload new images
                 if (imagePreviews.length > 0) {
                     await uploadNewsImages(newsId);
                 }
                 
-                showAlert('News saved successfully!', 'success');
+                showAlert(editMode ? 'News updated successfully!' : 'News saved successfully!', 'success');
                 setTimeout(() => {
                     window.location.href = 'news.html';
                 }, 1500);
             } else {
-                showAlert('Failed to save news', 'danger');
+                const errData = await res.json().catch(() => ({}));
+                showAlert(errData.error || 'Failed to save news', 'danger');
             }
         } catch (err) {
             showAlert('Error saving news', 'danger');
@@ -194,12 +338,36 @@ async function uploadNewsImages(newsId) {
 function initSlugGeneration() {
     const titleInput = document.getElementById('newsTitle');
     const slugInput = document.getElementById('newsSlug');
+    const metaTitleInput = document.getElementById('newsMetaTitle');
+    const metaDescInput = document.getElementById('newsMetaDesc');
+    const metaKeywordsInput = document.getElementById('newsMetaKeywords');
     
     if (titleInput && slugInput) {
         titleInput.addEventListener('input', async function() {
-            const baseSlug = generateSlug(this.value);
+            const title = this.value.trim();
+            const baseSlug = generateSlug(title);
             const uniqueSlug = await checkSlugUnique(baseSlug, existingSlugs);
             slugInput.value = uniqueSlug;
+            
+            // Auto-generate meta title
+            if (metaTitleInput) {
+                metaTitleInput.value = title;
+            }
+            
+            // Auto-generate meta keywords from title
+            if (metaKeywordsInput) {
+                metaKeywordsInput.value = extractKeywords(title);
+            }
+        });
+    }
+    
+    // Auto-generate meta description when short description changes
+    if (shortDescriptionEditor) {
+        shortDescriptionEditor.on('text-change', function() {
+            if (metaDescInput) {
+                const text = shortDescriptionEditor.getText().trim();
+                metaDescInput.value = text.substring(0, 160);
+            }
         });
     }
 }

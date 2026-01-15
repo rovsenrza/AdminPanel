@@ -212,8 +212,14 @@ window.editCategory = function(id) {
     const cat = categories.find(c => c.id === id);
     if (!cat) return;
     
-    document.getElementById('editCategoryName').value = cat.name || '';
-    document.getElementById('editCategorySlug').value = cat.slug || '';
+    const nameInput = document.getElementById('editCategoryName');
+    const slugInput = document.getElementById('editCategorySlug');
+    const metaTitleInput = document.getElementById('editCategoryMetaTitle');
+    const metaDescInput = document.getElementById('editCategoryMetaDesc');
+    const metaKeywordsInput = document.getElementById('editCategoryMetaKeywords');
+    
+    nameInput.value = cat.name || '';
+    slugInput.value = cat.slug || '';
     
     updateParentDropdowns();
     const parentSelect = document.getElementById('editCategoryParent');
@@ -222,16 +228,40 @@ window.editCategory = function(id) {
     if (selfOption) selfOption.remove();
     parentSelect.value = cat.parent_id || '';
     
-    document.getElementById('editCategoryMetaTitle').value = cat.meta_title || '';
-    document.getElementById('editCategoryMetaDesc').value = cat.meta_description || '';
-    document.getElementById('editCategoryMetaKeywords').value = cat.meta_keywords || '';
+    metaTitleInput.value = cat.meta_title || '';
+    metaDescInput.value = cat.meta_description || '';
+    metaKeywordsInput.value = cat.meta_keywords || '';
     
     const modal = document.getElementById('editCategoryModal');
     modal.setAttribute('data-edit-id', id);
+    modal.setAttribute('data-original-slug', cat.slug || '');
+    
+    // Remove old event listeners by cloning and replacing
+    const newNameInput = nameInput.cloneNode(true);
+    nameInput.parentNode.replaceChild(newNameInput, nameInput);
+    newNameInput.value = cat.name || '';
+    
+    // Add event listener for auto-slug and auto-meta generation
+    newNameInput.addEventListener('input', function() {
+        const name = this.value.trim();
+        // Auto-generate slug from name
+        document.getElementById('editCategorySlug').value = generateSlug(name);
+        // Auto-generate meta title
+        document.getElementById('editCategoryMetaTitle').value = name;
+        // Auto-generate meta description
+        document.getElementById('editCategoryMetaDesc').value = name ? `Browse all articles in ${name} category` : '';
+        // Auto-generate meta keywords
+        document.getElementById('editCategoryMetaKeywords').value = name ? generateKeywordsFromName(name) : '';
+    });
     
     // Use Bootstrap modal
     const bsModal = new bootstrap.Modal(modal);
     bsModal.show();
+}
+
+function generateKeywordsFromName(name) {
+    const words = name.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+    return words.join(', ');
 }
 
 window.saveCategoryEdit = async function() {
