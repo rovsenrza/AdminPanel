@@ -22,14 +22,37 @@ async function loadCategories() {
         categories = data.items || [];
         
         select.innerHTML = '<option value="">Select Category</option>';
-        categories.forEach(cat => {
-            const prefix = cat.parent_id ? '— ' : '';
-            select.innerHTML += `<option value="${cat.id}">${prefix}${cat.name}</option>`;
+        
+        // Build hierarchy
+        const sorted = [...categories].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+        const parentCats = sorted.filter(c => !c.parent_id);
+        
+        parentCats.forEach(cat => {
+            select.innerHTML += `<option value="${cat.id}">${escapeHtml(cat.name)}</option>`;
+            // Add children
+            addChildCategoryOptions(select, cat.id, sorted, 1);
         });
     } catch (err) {
         select.innerHTML = '<option value="">Failed to load categories</option>';
         console.error('Failed to load categories:', err);
     }
+}
+
+function addChildCategoryOptions(select, parentId, allCategories, level) {
+    const children = allCategories.filter(c => c.parent_id === parentId);
+    const indent = '\u00A0\u00A0\u00A0'.repeat(level) + '— ';
+    children.forEach(child => {
+        select.innerHTML += `<option value="${child.id}">${indent}${escapeHtml(child.name)}</option>`;
+        // Recursively add sub-children
+        addChildCategoryOptions(select, child.id, allCategories, level + 1);
+    });
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
 }
 
 function initEditors() {

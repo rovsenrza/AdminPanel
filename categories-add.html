@@ -236,12 +236,36 @@
                 
                 const select = document.getElementById('parentCategory');
                 select.innerHTML = '<option value="">None (Main Category)</option>';
-                categories.filter(c => !c.parent_id).forEach(cat => {
-                    select.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
+                
+                // Build hierarchy
+                const sorted = [...categories].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+                const parentCats = sorted.filter(c => !c.parent_id);
+                
+                parentCats.forEach(cat => {
+                    select.innerHTML += `<option value="${cat.id}">${escapeHtml(cat.name)}</option>`;
+                    // Add children
+                    addChildOptions(select, cat.id, sorted, 1);
                 });
             } catch (err) {
                 console.error('Failed to load categories:', err);
             }
+        }
+        
+        function addChildOptions(select, parentId, allCategories, level) {
+            const children = allCategories.filter(c => c.parent_id === parentId);
+            const indent = '\u00A0\u00A0\u00A0'.repeat(level) + '— ';
+            children.forEach(child => {
+                select.innerHTML += `<option value="${child.id}">${indent}${escapeHtml(child.name)}</option>`;
+                // Recursively add sub-children
+                addChildOptions(select, child.id, allCategories, level + 1);
+            });
+        }
+        
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
         }
         
         function addIconInput() {
