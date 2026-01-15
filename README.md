@@ -1,298 +1,325 @@
-# Admin Panel - Content Management System
+# Admin Panel - Complete Setup Guide
 
-A modern, responsive admin panel built with HTML, CSS, Bootstrap, JavaScript, and various libraries. Designed based on the Sneat dashboard template with capsule-style isolated components.
+A modern admin panel with PHP + MySQL backend for managing categories, news, settings, and user profiles.
 
-## Features
+---
 
-### Categories Management
-- Create, edit, and delete categories
-- Hierarchical category structure (parent/child relationships)
-- Drag-and-drop sorting functionality with SortableJS
-- Visual organization with nested subcategories
-- **Auto-generated slugs** from category names
-- **Automatic slug uniqueness** with -1, -2 suffix for duplicates
-- **SEO metatags**: Meta title, description, and keywords
-- Category ID tracking for database relations
+## 🚀 QUICK START (Step-by-Step)
 
-### News Management
-- Complete CRUD operations for news articles
-- Rich text editors for short and full descriptions (Quill.js)
-- Multiple image upload with preview and **400KB size limit validation**
-- Video support (URL and file upload)
-- **Auto-generated slugs** from news titles
-- **SEO optimization** with dedicated section:
-  - Meta title (auto-uses news title if empty)
-  - Meta description (auto-uses short description if empty)
-  - Meta keywords (auto-extracted from content if empty)
-  - Custom slug field
-- Dynamic extra fields system:
-  - Text inputs
-  - Text areas
-  - Switch toggles
-  - Dropdown lists
-  - Image uploads
-  - File uploads (PDF, ZIP, RAR, etc.)
-- Publish/unpublish functionality
-- Category assignment with category ID relation
+Follow these steps **in order** to set up the admin panel on your hosting.
 
-### Settings Page
-- **General Settings**:
-  - Site title (editable)
-  - Site domain (editable)
-  - Language selection (English, Azerbaijani, Russian, Turkish)
-  - News per page for pagination (1-100)
-  - Maintenance mode toggle
-- **SEO Settings**:
-  - Default meta title, description, keywords
-  - Google Analytics ID
-  - Google Search Console verification
-- **Social Media**:
-  - Facebook, Twitter, Instagram, YouTube URLs
+---
 
-### Profile Page
-- Username management (required)
-- Password change functionality with validation
-- Email field (optional)
-- Phone number field (optional)
-- User avatar display
+## Step 1: Upload Files to Hosting
 
-### UI/UX Features
-- **Dark/Light Mode Toggle**: Persistent theme with localStorage
-- **Collapsible Sidebar**: 
-  - Purple close button for toggling
-  - Shows only icons when collapsed
-  - Smooth transitions
-  - State persists across sessions
-- **Isolated Capsule Design**:
-  - Header and sidebar with 6px border radius
-  - 15px spacing between components
-  - Elevated, modern appearance
-- **Active Menu Items**: Isolated with capsule style and shadow
-- **Technical Support**: WhatsApp and Telegram icons in navbar
-- **Responsive Design**: Mobile-friendly layout
+### Option A: Git (Recommended)
+```bash
+git add .
+git commit -m "Admin panel"
+git push origin main
+```
+Then pull on hosting via cPanel Git or SSH.
 
-### Design Elements (Based on Sneat Dashboard)
+### Option B: FTP/File Manager
+Upload all files to your domain's document root folder.
 
-#### Colors
-- Primary: `#696cff`
-- Primary Hover: `#5f61e6`
-- Success: `#71dd37`
-- Danger: `#ff3e1d`
-- Warning: `#ffab00`
-- Info: `#03c3ec`
-- Secondary: `#8592a3`
-- Body Background: `#f5f5f9`
-- **Dark Mode Colors**:
-  - Body BG: `#2b2c40`
-  - Card BG: `#312d4b`
-  - Border: `#464564`
-  - Text: `#b4b7bd`
+---
 
-#### Typography
-- Font Family: 'Public Sans'
-- Base Font Size: 0.9375rem (15px)
-- Line Height: 1.53
+## Step 2: Create MySQL Database
 
-#### Box Shadows
-- Small: `0 2px 6px 0 rgba(67, 89, 113, 0.12)`
-- Medium: `0 4px 8px -4px rgba(67, 89, 113, 0.2)`
-- Large: `0 6px 20px 0 rgba(67, 89, 113, 0.15)`
+In **cPanel → MySQL Databases**:
 
-#### Border Radius
-- Default: `0.375rem`
-- Small: `0.25rem`
-- Large: `0.5rem`
-- **Capsule: `6px`** (for isolated components)
+1. **Create Database**: `whm81_adminpanel`
+2. **Create User**: `whm81_adminpanel` with password `adminpanel_2390%`
+3. **Add User to Database** with **ALL PRIVILEGES**
 
-## Project Structure
+---
+
+## Step 3: Create .env File
+
+Create file: `/backend/.env`
+
+```env
+DB_HOST=localhost
+DB_NAME=whm81_adminpanel
+DB_USER=whm81_adminpanel
+DB_PASS=adminpanel_2390%
+SESSION_NAME=admin_session
+INSTALL_KEY=92f0a49da5f8a73bf0cf52fd5b997229d30f735f355973d33c97dae96029ce1e
+```
+
+**Important:** Replace credentials with your actual database info.
+
+---
+
+## Step 4: Set File Permissions
+
+In **cPanel → File Manager**, set these permissions:
+
+| File/Folder | Permission |
+|-------------|------------|
+| `/.htaccess` | 644 |
+| `/backend/.htaccess` | 644 |
+| `/backend/.env` | 644 |
+| `/backend/` folder | 755 |
+| `/backend/lib/` folder | 755 |
+| `/backend/routes/` folder | 755 |
+| `/backend/database/` folder | 755 |
+| `/uploads/` folder | 755 |
+
+**To set permissions:** Right-click file → Change Permissions → Enter number → Save
+
+---
+
+## Step 5: Create Uploads Folder
+
+In **cPanel → File Manager**:
+
+1. Navigate to your domain root
+2. Create folder: `uploads`
+3. Inside `uploads`, create folder: `news`
+4. Set both folders to permission `755`
+
+---
+
+## Step 6: Run Installer
+
+Open this URL in your browser:
 
 ```
-admin-panel/
-├── index.html              # Dashboard homepage
-├── categories.html         # Categories list with drag-drop
-├── categories-add.html     # Add new category with SEO
-├── news.html              # News list
-├── news-add.html          # Add/edit news with all features
-├── settings.html          # Site settings and configuration
-├── profile.html           # User profile management
+https://adminpanel.81.whm.az/backend/install.php?key=92f0a49da5f8a73bf0cf52fd5b997229d30f735f355973d33c97dae96029ce1e
+```
+
+**What happens:**
+1. Database tables are created automatically
+2. You'll see a form to create admin user
+3. Fill in: Username, Email, Password
+4. Click **Create Admin User**
+5. **COPY THE API KEY** shown after success (you'll need it for your website)
+
+---
+
+## Step 7: Login to Admin Panel
+
+Open:
+```
+https://adminpanel.81.whm.az/login.html
+```
+
+Login with the email and password you created in Step 6.
+
+---
+
+## Step 8: Security (After Installation)
+
+**Important:** After successful installation, do ONE of these:
+
+### Option A: Delete installer file
+In cPanel File Manager, delete: `/backend/install.php`
+
+### Option B: Remove INSTALL_KEY
+Edit `/backend/.env` and remove or comment out the INSTALL_KEY line:
+```env
+# INSTALL_KEY=...
+```
+
+---
+
+## ✅ DONE!
+
+Your admin panel is now ready at:
+- **Admin Panel:** `https://adminpanel.81.whm.az/index.html`
+- **Login Page:** `https://adminpanel.81.whm.az/login.html`
+
+---
+
+## 🌐 PUBLIC API (For Your Website)
+
+Use these endpoints to fetch data for your website.
+
+**All requests require API key** (from Step 6).
+
+### Get Categories
+```
+GET https://adminpanel.81.whm.az/backend/public/categories?api_key=YOUR_API_KEY
+```
+
+### Get News List
+```
+GET https://adminpanel.81.whm.az/backend/public/news?api_key=YOUR_API_KEY&page=1&per_page=10
+```
+
+### Get Single News
+```
+GET https://adminpanel.81.whm.az/backend/public/news?api_key=YOUR_API_KEY&slug=news-slug-here
+```
+
+### Get Settings
+```
+GET https://adminpanel.81.whm.az/backend/public/settings?api_key=YOUR_API_KEY
+```
+
+### JavaScript Example
+```javascript
+const API_KEY = 'your_api_key_here';
+const API_BASE = 'https://adminpanel.81.whm.az/backend';
+
+// Fetch news
+fetch(`${API_BASE}/public/news?api_key=${API_KEY}&page=1`)
+  .then(res => res.json())
+  .then(data => {
+    data.news.forEach(article => {
+      console.log(article.title, article.image);
+    });
+  });
+```
+
+---
+
+## 🔧 TROUBLESHOOTING
+
+### Error: "Forbidden" or 403
+**Cause:** .htaccess file permissions wrong
+**Fix:** Set `/.htaccess` and `/backend/.htaccess` to permission `644`
+
+### Error: "Database is not configured"
+**Cause:** .env file not found or wrong credentials
+**Fix:** 
+1. Verify `/backend/.env` exists
+2. Check DB credentials match cPanel database
+3. Set `/backend/.env` permission to `644`
+
+### Error: "Set INSTALL_KEY env var"
+**Cause:** .env file not being read
+**Fix:**
+1. Verify `/backend/.env` exists and contains `INSTALL_KEY=...`
+2. Set permission to `644`
+3. Make sure there are no extra spaces in .env file
+
+### Login returns 405 Method Not Allowed
+**Cause:** .htaccess routing not working
+**Fix:** 
+1. Check `/.htaccess` exists with correct content
+2. Set permission to `644`
+3. Verify Apache mod_rewrite is enabled (usually is on cPanel)
+
+### Pages accessible without login
+**Cause:** JavaScript auth guard not running
+**Fix:** This is normal if backend is not responding. Fix backend first.
+
+---
+
+## 📁 FILE STRUCTURE
+
+```
+adminpanel/
+├── index.html              # Dashboard
+├── login.html              # Login page
+├── categories.html         # Categories list
+├── categories-add.html     # Add category
+├── news.html               # News list
+├── news-add.html           # Add news
+├── settings.html           # Site settings
+├── profile.html            # User profile
+├── .htaccess               # Root routing rules
 ├── assets/
-│   ├── css/
-│   │   └── style.css      # Main stylesheet with dark mode
+│   ├── css/style.css
 │   └── js/
-│       ├── main.js        # Core functionality, dark mode, sidebar toggle
-│       ├── categories.js  # Category management with slug generation
-│       └── news.js        # News management with editors and SEO
-└── README.md
+│       ├── main.js         # Auth guard, theme, sidebar
+│       ├── categories.js   # Categories CRUD
+│       └── news.js         # News CRUD
+├── uploads/
+│   └── news/               # Uploaded images
+└── backend/
+    ├── .htaccess           # Backend routing
+    ├── .env                # Database config (create this)
+    ├── index.php           # API router
+    ├── install.php         # Installer (delete after setup)
+    ├── lib/
+    │   ├── bootstrap.php
+    │   ├── config.php      # Loads .env
+    │   ├── db.php          # Database connection
+    │   ├── http.php        # HTTP helpers
+    │   └── auth.php        # Authentication
+    ├── routes/
+    │   ├── auth_login.php
+    │   ├── auth_logout.php
+    │   ├── auth_csrf.php
+    │   ├── api_me.php
+    │   ├── api_categories.php
+    │   ├── api_news.php
+    │   ├── api_settings.php
+    │   ├── api_profile.php
+    │   ├── api_upload.php
+    │   ├── public_categories.php
+    │   ├── public_news.php
+    │   └── public_settings.php
+    └── database/
+        └── schema.sql      # Database schema
 ```
 
-## Technologies Used
+---
 
-- **HTML5** - Semantic markup
-- **CSS3** - Custom styling with CSS variables
-- **Bootstrap 5.3** - Responsive grid and components
-- **Font Awesome 6.4** - Icons
-- **Quill.js 2.0** - Rich text editor
-- **SortableJS 1.15** - Drag-and-drop functionality
-- **Google Fonts** - Public Sans font family
+## 🔐 SECURITY NOTES
 
-## Installation
+1. **Delete install.php** after installation
+2. **Keep API key secret** - only use in server-side code
+3. **.env is protected** by .htaccess (cannot be accessed via browser)
+4. **Use HTTPS** in production
+5. **Strong passwords** for admin users
 
-1. Download or clone the project
-2. Open `index.html` in a web browser
-3. No build process required - pure HTML/CSS/JS
+---
 
-## Usage
+## 📞 FEATURES
 
-### Categories
-1. Navigate to **Categories > All Categories** to view and manage categories
-2. Drag categories to reorder them using the grip handle
-3. Click **Add Category** to create new categories
-4. Enter category name - slug auto-generates (e.g., "Technology" → "technology")
-5. If duplicate names exist, slug auto-adds suffix (e.g., "technology-1")
-6. Fill in SEO fields: meta title, description, keywords
-7. Assign parent categories to create hierarchical structure
+### Admin Panel
+- ✅ Categories CRUD with drag-drop reordering
+- ✅ News CRUD with rich text editor
+- ✅ Image upload (400KB limit)
+- ✅ SEO fields (meta title, description, keywords)
+- ✅ Auto-generated slugs
+- ✅ Settings management
+- ✅ Profile and password change
+- ✅ Dark/Light mode toggle
+- ✅ Collapsible sidebar
+- ✅ Remember me (30 days)
 
-### News
-1. Navigate to **News > All News** to view all news articles
-2. Click **Add News** to create a new article
-3. Fill in the required fields:
-   - **Title** (slug auto-generates)
-   - **Category** (linked by category ID)
-   - **Images**: Click + to add multiple (max 400KB each)
-   - **Short description** (rich text editor)
-   - **Full description** (rich text editor)
-   - **Video**: URL or file upload
-   - **Extra fields** (optional, dynamic)
-4. Configure **SEO Settings**:
-   - Meta title (auto-uses title if empty)
-   - Meta description (auto-uses short desc if empty)
-   - Meta keywords (auto-extracted if empty)
-   - Custom slug
-5. Toggle publish status
-6. Click **Save News**
+### Public API
+- ✅ Get categories
+- ✅ Get news list (paginated)
+- ✅ Get single news by slug
+- ✅ Get site settings
+- ✅ API key authentication
 
-### Extra Fields
-Extra fields allow you to add custom data to news articles:
-- Click **Add Field** in the Extra Fields section
-- Choose field type (text, textarea, switch, list, image, file)
-- Enter field name and value
-- Remove fields with the trash icon
+---
 
-### Settings
-1. Navigate to **Settings** from the sidebar
-2. Configure general settings (site title, domain, language, pagination)
-3. Enable/disable maintenance mode
-4. Set up SEO defaults and analytics
-5. Add social media URLs
-6. Click **Save Settings**
+## 🎨 DESIGN
 
-### Profile
-1. Click user avatar or navigate to **Profile**
-2. Update username, email, phone number
-3. Change password with current password verification
-4. Click **Update Profile** or **Change Password**
+Based on Sneat Bootstrap Admin Template:
+- Primary color: `#696cff`
+- Dark mode: `#212121` background
+- Capsule design with 6px border radius
+- Bootstrap 5.3 + Font Awesome 6.4
 
-### Dark Mode
-- Click the moon/sun icon in the navbar to toggle dark/light mode
-- Theme preference is saved and persists across sessions
+---
 
-### Sidebar
-- Click the purple close button (×) to collapse sidebar
-- Collapsed sidebar shows only icons
-- Click again (→) to expand
-- State persists across page navigation
+## 📝 YOUR HOSTING INFO
 
-## Browser Support
-
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
-
-## Backend Integration
-
-This is a frontend template. To connect to your backend:
-
-## Included Backend (PHP + MySQL)
-
-This repo now includes a lightweight backend under `backend/` designed to run on WHM/cPanel (Apache + PHP + MySQL).
-
-### Backend URLs
-
-- `GET /backend/` – health message
-- `POST /backend/auth/login` – login (HTML form)
-- `POST /backend/auth/logout` – logout
-- `GET /backend/auth/csrf` – CSRF token for login form
-- `GET /backend/api/me` – session check (used by `assets/js/main.js` auth guard)
-- `GET|POST|PUT|DELETE /backend/api/categories`
-- `GET|POST|PUT|DELETE /backend/api/news`
-- `GET|PUT /backend/api/settings`
-- `PUT /backend/api/profile`
-
-### Configure environment variables (hosting)
-
-Set these on hosting (recommended), or via `.user.ini` / hosting environment settings:
-
-- `DB_HOST`
-- `DB_NAME`
-- `DB_USER`
-- `DB_PASS`
-- `DB_PORT` (optional, default `3306`)
-
-Installer protection:
-
-- `INSTALL_KEY` (required to run installer)
-
-### First-time install
-
-1. Create a MySQL database + user in cPanel and assign permissions.
-2. Set the DB env vars above.
-3. Set `INSTALL_KEY` to a long random value.
-4. Open:
-   - `/backend/install.php?key=YOUR_INSTALL_KEY`
-5. Create the first admin user in the installer form.
-6. After successful install:
-   - remove `INSTALL_KEY` or delete `/backend/install.php`
-
-### Login
-
-- Open `/login.html`
-- Login form posts to `/backend/auth/login`
-- On success you are redirected to `/index.html`
-
-### Notes
-
-- The frontend pages are protected by an auth guard in `assets/js/main.js`.
-  If `/backend/api/me` returns `401`, the user is redirected to `/login.html`.
-- Server-side upload endpoints are not implemented yet; current API focuses on auth + core CRUD.
-
-1. Update form submission handlers in `assets/js/news.js` and `assets/js/categories.js`
-2. Replace `console.log()` calls with actual API requests
-3. Implement authentication and authorization
-4. Add data fetching for dynamic content
-
-## Customization
-
-### Colors
-Edit CSS variables in `assets/css/style.css`:
-```css
-:root {
-    --primary-color: #696cff;
-    --success-color: #71dd37;
-    /* ... other colors */
-}
+```
+Domain: adminpanel.81.whm.az
+DB Name: whm81_adminpanel
+DB User: whm81_adminpanel
+DB Pass: adminpanel_2390%
+Install Key: 92f0a49da5f8a73bf0cf52fd5b997229d30f735f355973d33c97dae96029ce1e
 ```
 
-### Sidebar Menu
-Edit the menu structure in each HTML file's sidebar section.
+**Installer URL:**
+```
+https://adminpanel.81.whm.az/backend/install.php?key=92f0a49da5f8a73bf0cf52fd5b997229d30f735f355973d33c97dae96029ce1e
+```
 
-### Extra Field Types
-Add new field types in the `updateExtraFieldInput()` function in `assets/js/news.js`.
+---
 
 ## License
 
 Free to use for personal and commercial projects.
-
-## Credits
-
-Design inspired by Sneat Bootstrap Admin Template by ThemeSelection.

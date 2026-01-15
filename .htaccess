@@ -19,7 +19,11 @@ RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule ^(assets|uploads)/.*$ - [L]
 
-# Route /backend/* to backend/index.php
+# Allow direct access to backend PHP files that exist
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^backend/.*\.php$ - [L]
+
+# Route other /backend/* requests to backend/index.php
 RewriteCond %{REQUEST_URI} ^/backend/
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
