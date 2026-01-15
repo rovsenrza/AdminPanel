@@ -1,43 +1,43 @@
-# Admin Panel - Complete Setup Guide
+# Admin Panel - Tam Quraşdırma Təlimatı
 
-A modern admin panel with PHP + MySQL backend for managing categories, news, settings, and user profiles.
-
----
-
-## 🚀 QUICK START (Step-by-Step)
-
-Follow these steps **in order** to set up the admin panel on your hosting.
+Kateqoriyaları, xəbərləri, parametrləri və istifadəçi profillərini idarə etmək üçün PHP + MySQL backend ilə müasir admin panel.
 
 ---
 
-## Step 1: Upload Files to Hosting
+## 🚀 SÜRƏTLİ BAŞLANĞIC (Addım-addım)
 
-### Option A: Git (Recommended)
+Admin paneli hostinginizdə quraşdırmaq üçün **sıra ilə** bu addımları izləyin.
+
+---
+
+## Addım 1: Faylları Hostinqə Yükləyin
+
+### Seçim A: Git (Tövsiyə olunur)
 ```bash
 git add .
 git commit -m "Admin panel"
 git push origin main
 ```
-Then pull on hosting via cPanel Git or SSH.
+Sonra cPanel Git və ya SSH vasitəsilə hostingdə pull edin.
 
-### Option B: FTP/File Manager
-Upload all files to your domain's document root folder.
-
----
-
-## Step 2: Create MySQL Database
-
-In **cPanel → MySQL Databases**:
-
-1. **Create Database**: `whm81_adminpanel`
-2. **Create User**: `whm81_adminpanel` with password `adminpanel_2390%`
-3. **Add User to Database** with **ALL PRIVILEGES**
+### Seçim B: FTP/Fayl Meneceri
+Bütün faylları domeninizin dokument kök qovluğuna yükləyin.
 
 ---
 
-## Step 3: Create .env File
+## Addım 2: MySQL Verilənlər Bazası Yaradın
 
-Create file: `/backend/.env`
+**cPanel → MySQL Databases** bölməsində:
+
+1. **Verilənlər Bazası Yaradın**: `whm81_adminpanel`
+2. **İstifadəçi Yaradın**: `whm81_adminpanel` şifrə ilə `adminpanel_2390%`
+3. **İstifadəçini Bazaya Əlavə Edin** **BÜTÜN İCazələrlə**
+
+---
+
+## Addım 3: .env Faylı Yaradın
+
+Fayl yaradın: `/backend/.env`
 
 ```env
 DB_HOST=localhost
@@ -48,123 +48,123 @@ SESSION_NAME=admin_session
 INSTALL_KEY=92f0a49da5f8a73bf0cf52fd5b997229d30f735f355973d33c97dae96029ce1e
 ```
 
-**Important:** Replace credentials with your actual database info.
+**Vacib:** Kimlik məlumatlarını öz faktiki verilənlər bazası məlumatlarınızla əvəz edin.
 
 ---
 
-## Step 4: Set File Permissions
+## Addım 4: Fayl İcazələrini Təyin Edin
 
-In **cPanel → File Manager**, set these permissions:
+**cPanel → File Manager** bölməsində bu icazələri təyin edin:
 
-| File/Folder | Permission |
-|-------------|------------|
+| Fayl/Qovluq | İcazə |
+|-------------|-------|
 | `/.htaccess` | 644 |
 | `/backend/.htaccess` | 644 |
 | `/backend/.env` | 644 |
-| `/backend/` folder | 755 |
-| `/backend/lib/` folder | 755 |
-| `/backend/routes/` folder | 755 |
-| `/backend/database/` folder | 755 |
-| `/uploads/` folder | 755 |
+| `/backend/` qovluq | 755 |
+| `/backend/lib/` qovluq | 755 |
+| `/backend/routes/` qovluq | 755 |
+| `/backend/database/` qovluq | 755 |
+| `/uploads/` qovluq | 755 |
 
-**To set permissions:** Right-click file → Change Permissions → Enter number → Save
-
----
-
-## Step 5: Create Uploads Folder
-
-In **cPanel → File Manager**:
-
-1. Navigate to your domain root
-2. Create folder: `uploads`
-3. Inside `uploads`, create folder: `news`
-4. Set both folders to permission `755`
+**İcazə təyin etmək üçün:** Fayla sağ klik → Change Permissions → Nömrə daxil edin → Saxla
 
 ---
 
-## Step 6: Run Installer
+## Addım 5: Uploads Qovluğunu Yaradın
 
-Open this URL in your browser:
+**cPanel → File Manager** bölməsində:
+
+1. Domen kökünüzə keçin
+2. Qovluq yaradın: `uploads`
+3. `uploads` daxilində qovluq yaradın: `news`
+4. Hər iki qovluğa `755` icazəsini təyin edin
+
+---
+
+## Addım 6: Quraşdırıcını Çalışdırın
+
+Brauzerinizdə bu URL-i açın:
 
 ```
 https://adminpanel.81.whm.az/backend/install.php?key=92f0a49da5f8a73bf0cf52fd5b997229d30f735f355973d33c97dae96029ce1e
 ```
 
-**What happens:**
-1. Database tables are created automatically
-2. You'll see a form to create admin user
-3. Fill in: Username, Email, Password
-4. Click **Create Admin User**
-5. **COPY THE API KEY** shown after success (you'll need it for your website)
+**Nə baş verir:**
+1. Verilənlər bazası cədvəlləri avtomatik yaradılır
+2. Admin istifadəçi yaratmaq üçün forma görünəcək
+3. Doldurun: İstifadəçi adı, Email, Şifrə
+4. **Admin İstifadəçi Yaradın** düyməsinə klik edin
+5. Uğur göstəriləndən sonra **API KEY-İ KÖÇÜRÜN** (vebsaytınız üçün lazım olacaq)
 
 ---
 
-## Step 7: Login to Admin Panel
+## Addım 7: Admin Panelə Daxil Olun
 
-Open:
+Açın:
 ```
 https://adminpanel.81.whm.az/login.html
 ```
 
-Login with the email and password you created in Step 6.
+Addım 6-da yaratdığınız email və şifrə ilə daxil olun.
 
 ---
 
-## Step 8: Security (After Installation)
+## Addım 8: Təhlükəsizlik (Quraşdırmadan Sonra)
 
-**Important:** After successful installation, do ONE of these:
+**Vacib:** Uğurlu quraşdırmadan sonra bunlardan BİRİNİ edin:
 
-### Option A: Delete installer file
-In cPanel File Manager, delete: `/backend/install.php`
+### Seçim A: Quraşdırıcı faylını silin
+cPanel File Manager-də silin: `/backend/install.php`
 
-### Option B: Remove INSTALL_KEY
-Edit `/backend/.env` and remove or comment out the INSTALL_KEY line:
+### Seçim B: INSTALL_KEY-İ silin
+`/backend/.env` faylını redaktə edin və INSTALL_KEY sətirini silin və ya şərhə alın:
 ```env
 # INSTALL_KEY=...
 ```
 
 ---
 
-## ✅ DONE!
+## ✅ TAMAM!
 
-Your admin panel is now ready at:
+Admin paneliniz artıq hazırdır:
 - **Admin Panel:** `https://adminpanel.81.whm.az/index.html`
-- **Login Page:** `https://adminpanel.81.whm.az/login.html`
+- **Giriş Səhifəsi:** `https://adminpanel.81.whm.az/login.html`
 
 ---
 
-## 🌐 PUBLIC API (For Your Website)
+## 🌐 İCTİMAİ API (Vebsaytınız Üçün)
 
-Use these endpoints to fetch data for your website.
+Vebsaytınız üçün məlumat əldə etmək üçün bu endpoint-lərdən istifadə edin.
 
-**All requests require API key** (from Step 6).
+**Bütün sorğular API açarı tələb edir** (Addım 6-dan).
 
-### Get Categories
+### Kateqoriyaları Əldə Et
 ```
 GET https://adminpanel.81.whm.az/backend/public/categories?api_key=YOUR_API_KEY
 ```
 
-### Get News List
+### Xəbər Siyahısını Əldə Et
 ```
 GET https://adminpanel.81.whm.az/backend/public/news?api_key=YOUR_API_KEY&page=1&per_page=10
 ```
 
-### Get Single News
+### Tək Xəbər Əldə Et
 ```
 GET https://adminpanel.81.whm.az/backend/public/news?api_key=YOUR_API_KEY&slug=news-slug-here
 ```
 
-### Get Settings
+### Parametrləri Əldə Et
 ```
 GET https://adminpanel.81.whm.az/backend/public/settings?api_key=YOUR_API_KEY
 ```
 
-### JavaScript Example
+### JavaScript Nümunəsi
 ```javascript
 const API_KEY = 'your_api_key_here';
 const API_BASE = 'https://adminpanel.81.whm.az/backend';
 
-// Fetch news
+// Xəbərləri əldə et
 fetch(`${API_BASE}/public/news?api_key=${API_KEY}&page=1`)
   .then(res => res.json())
   .then(data => {
@@ -176,71 +176,71 @@ fetch(`${API_BASE}/public/news?api_key=${API_KEY}&page=1`)
 
 ---
 
-## 🔧 TROUBLESHOOTING
+## 🔧 PROBLEM HƏLLİ
 
-### Error: "Forbidden" or 403
-**Cause:** .htaccess file permissions wrong
-**Fix:** Set `/.htaccess` and `/backend/.htaccess` to permission `644`
+### Xəta: "Forbidden" və ya 403
+**Səbəb:** .htaccess fayl icazələri səhvdir
+**Həll:** `/.htaccess` və `/backend/.htaccess` fayllarına `644` icazəsini təyin edin
 
-### Error: "Database is not configured"
-**Cause:** .env file not found or wrong credentials
-**Fix:** 
-1. Verify `/backend/.env` exists
-2. Check DB credentials match cPanel database
-3. Set `/backend/.env` permission to `644`
+### Xəta: "Database is not configured"
+**Səbəb:** .env faylı tapılmadı və ya kimlik məlumatları səhvdir
+**Həll:** 
+1. `/backend/.env` faylının mövcud olduğunu yoxlayın
+2. DB kimlik məlumatlarının cPanel verilənlər bazası ilə uyğun olduğunu yoxlayın
+3. `/backend/.env` faylına `644` icazəsini təyin edin
 
-### Error: "Set INSTALL_KEY env var"
-**Cause:** .env file not being read
-**Fix:**
-1. Verify `/backend/.env` exists and contains `INSTALL_KEY=...`
-2. Set permission to `644`
-3. Make sure there are no extra spaces in .env file
+### Xəta: "Set INSTALL_KEY env var"
+**Səbəb:** .env faylı oxunmur
+**Həll:**
+1. `/backend/.env` faylının mövcud olduğunu və `INSTALL_KEY=...` ehtiva etdiyini yoxlayın
+2. İcazəni `644` olaraq təyin edin
+3. .env faylında əlavə boşluqlar olmadığından əmin olun
 
-### Login returns 405 Method Not Allowed
-**Cause:** .htaccess routing not working
-**Fix:** 
-1. Check `/.htaccess` exists with correct content
-2. Set permission to `644`
-3. Verify Apache mod_rewrite is enabled (usually is on cPanel)
+### Giriş 405 Method Not Allowed qaytarır
+**Səbəb:** .htaccess yönləndirməsi işləmir
+**Həll:** 
+1. `/.htaccess` faylının mövcud olduğunu və düzgün məzmunla yoxlayın
+2. İcazəni `644` olaraq təyin edin
+3. Apache mod_rewrite modulunun aktiv olduğunu yoxlayın (adətən cPanel-də aktivdir)
 
-### Pages accessible without login
-**Cause:** JavaScript auth guard not running
-**Fix:** This is normal if backend is not responding. Fix backend first.
+### Səhifələr giriş olmadan açılır
+**Səbəb:** JavaScript auth guard işləmir
+**Həll:** Bu normaldır, əgər backend cavab vermirsə. Əvvəlcə backend-i düzəldin.
 
 ---
 
-## 📁 FILE STRUCTURE
+## 📁 FAYL QURULUŞU
 
 ```
 adminpanel/
 ├── index.html              # Dashboard
-├── login.html              # Login page
-├── categories.html         # Categories list
-├── categories-add.html     # Add category
-├── news.html               # News list
-├── news-add.html           # Add news
-├── settings.html           # Site settings
-├── profile.html            # User profile
-├── .htaccess               # Root routing rules
+├── login.html              # Giriş səhifəsi
+├── categories.html         # Kateqoriya siyahısı
+├── categories-add.html     # Kateqoriya əlavə et
+├── news.html               # Xəbər siyahısı
+├── news-add.html           # Xəbər əlavə et
+├── settings.html           # Sayt parametrləri
+├── profile.html            # İstifadəçi profili
+├── .htaccess               # Kök yönləndirmə qaydaları
 ├── assets/
 │   ├── css/style.css
 │   └── js/
-│       ├── main.js         # Auth guard, theme, sidebar
-│       ├── categories.js   # Categories CRUD
-│       └── news.js         # News CRUD
+│       ├── main.js         # Auth guard, tema, yan panel
+│       ├── categories.js   # Kateqoriya CRUD
+│       └── news.js         # Xəbər CRUD
 ├── uploads/
-│   └── news/               # Uploaded images
+│   └── news/               # Yüklənən şəkillər
 └── backend/
-    ├── .htaccess           # Backend routing
-    ├── .env                # Database config (create this)
+    ├── .htaccess           # Backend yönləndirməsi
+    ├── .env                # Verilənlər bazası konfiqurasiyası (bunu yaradın)
     ├── index.php           # API router
-    ├── install.php         # Installer (delete after setup)
+    ├── install.php         # Quraşdırıcı (quraşdırmadan sonra silin)
     ├── lib/
     │   ├── bootstrap.php
-    │   ├── config.php      # Loads .env
-    │   ├── db.php          # Database connection
-    │   ├── http.php        # HTTP helpers
-    │   └── auth.php        # Authentication
+    │   ├── config.php      # .env yükləyir
+    │   ├── db.php          # Verilənlər bazası əlaqəsi
+    │   ├── http.php        # HTTP köməkçiləri
+    │   └── auth.php        # Autentifikasiya
     ├── routes/
     │   ├── auth_login.php
     │   ├── auth_logout.php
@@ -255,71 +255,71 @@ adminpanel/
     │   ├── public_news.php
     │   └── public_settings.php
     └── database/
-        └── schema.sql      # Database schema
+        └── schema.sql      # Verilənlər bazası sxemi
 ```
 
 ---
 
-## 🔐 SECURITY NOTES
+## 🔐 TƏHLÜKƏSİZLİK QEYDLƏRİ
 
-1. **Delete install.php** after installation
-2. **Keep API key secret** - only use in server-side code
-3. **.env is protected** by .htaccess (cannot be accessed via browser)
-4. **Use HTTPS** in production
-5. **Strong passwords** for admin users
+1. **install.php faylını silin** quraşdırmadan sonra
+2. **API açarını gizli saxlayın** - yalnız server tərəfi kodunda istifadə edin
+3. **.env .htaccess ilə qorunur** (brauzer vasitəsilə daxil olmaq olmaz)
+4. **İstehsalda HTTPS istifadə edin**
+5. **Admin istifadəçilər üçün güclü şifrələr**
 
 ---
 
-## 📞 FEATURES
+## 📞 XÜSUSİYYƏTLƏR
 
 ### Admin Panel
-- ✅ Categories CRUD with drag-drop reordering
-- ✅ News CRUD with rich text editor
-- ✅ Image upload (400KB limit)
-- ✅ SEO fields (meta title, description, keywords)
-- ✅ Auto-generated slugs
-- ✅ Settings management
-- ✅ Profile and password change
-- ✅ Dark/Light mode toggle
-- ✅ Collapsible sidebar
-- ✅ Remember me (30 days)
+- ✅ Sürtmə-buraxma sıralama ilə Kateqoriya CRUD
+- ✅ Varlı mətn redaktoru ilə Xəbər CRUD
+- ✅ Şəkil yükləmə (400KB limit)
+- ✅ SEO sahələri (meta başlıq, təsvir, açar sözlər)
+- ✅ Avtomatik yaradılan slug-lar
+- ✅ Parametr idarəetməsi
+- ✅ Profil və şifrə dəyişikliyi
+- ✅ Qaranlıq/Aydın rejim keçid
+- ✅ Qatlanan yan panel
+- ✅ Məni yadda saxla (30 gün)
 
-### Public API
-- ✅ Get categories
-- ✅ Get news list (paginated)
-- ✅ Get single news by slug
-- ✅ Get site settings
-- ✅ API key authentication
+### İctimai API
+- ✅ Kateqoriyaları əldə et
+- ✅ Xəbər siyahısı (səhifə-səhifə)
+- ✅ Slug ilə tək xəbər əldə et
+- ✅ Sayt parametrlərini əldə et
+- ✅ API açarı autentifikasiyası
 
 ---
 
-## 🎨 DESIGN
+## 🎨 DİZAYN
 
-Based on Sneat Bootstrap Admin Template:
-- Primary color: `#696cff`
-- Dark mode: `#212121` background
-- Capsule design with 6px border radius
+Sneat Bootstrap Admin Şablonuna əsaslanır:
+- Əsas rəng: `#696cff`
+- Qaranlıq rejim: `#212121` fon
+- Kapsul dizaynı 6px border radius ilə
 - Bootstrap 5.3 + Font Awesome 6.4
 
 ---
 
-## 📝 YOUR HOSTING INFO
+## 📝 HOSTİNGİNİZİN MƏLUMATI
 
 ```
 Domain: adminpanel.81.whm.az
-DB Name: whm81_adminpanel
-DB User: whm81_adminpanel
-DB Pass: adminpanel_2390%
-Install Key: 92f0a49da5f8a73bf0cf52fd5b997229d30f735f355973d33c97dae96029ce1e
+DB Adı: whm81_adminpanel
+DB İstifadəçi: whm81_adminpanel
+DB Şifrə: adminpanel_2390%
+Quraşdırma Açarı: 92f0a49da5f8a73bf0cf52fd5b997229d30f735f355973d33c97dae96029ce1e
 ```
 
-**Installer URL:**
+**Quraşdırıcı URL:**
 ```
 https://adminpanel.81.whm.az/backend/install.php?key=92f0a49da5f8a73bf0cf52fd5b997229d30f735f355973d33c97dae96029ce1e
 ```
 
 ---
 
-## License
+## Lisenziya
 
-Free to use for personal and commercial projects.
+Şəxsi və kommersiya layihələri üçün pulsuz istifadə.
