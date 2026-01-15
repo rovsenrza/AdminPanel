@@ -257,7 +257,7 @@ body.dark-mode .sidebar-toggle-btn {
 }
 
 .app-brand-logo {
-    font-size: 1.75rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: var(--primary-color);
     text-decoration: none;
@@ -914,6 +914,7 @@ textarea.form-control {
     justify-content: space-between;
     transition: var(--transition);
 }
+.category-content{display:  flex;align-items: center;grid-area: 10px;}
 
 .category-item:hover {
     box-shadow: var(--box-shadow-sm);
@@ -928,6 +929,10 @@ textarea.form-control {
     display: flex;
     align-items: center;
     flex: 1;
+    gap: 10px;
+}
+.category-info h6{
+    margin: 0;
 }
 
 .category-actions {

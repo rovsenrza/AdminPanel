@@ -14,10 +14,11 @@ if ($method === 'GET') {
 if ($method === 'PUT') {
     $payload = input_json();
 
-    $stmt = db()->prepare('UPDATE settings SET site_title=?, domain=?, language=?, maintenance=?, news_per_page=?, seo_default_title=?, seo_default_description=?, seo_default_keywords=?, ga_id=?, gsc_verification=?, social_links_json=? WHERE id=1');
+    $stmt = db()->prepare('UPDATE settings SET site_title=?, domain=?, logo_path=?, language=?, maintenance=?, news_per_page=?, seo_default_title=?, seo_default_description=?, seo_default_keywords=?, ga_id=?, gsc_verification=?, social_links_json=?, telegram_link=?, whatsapp_number=? WHERE id=1');
     $stmt->execute([
         (string)($payload['site_title'] ?? ''),
         (string)($payload['domain'] ?? ''),
+        (string)($payload['logo_path'] ?? ''),
         (string)($payload['language'] ?? 'en'),
         !empty($payload['maintenance']) ? 1 : 0,
         (int)($payload['news_per_page'] ?? 10),
@@ -27,6 +28,8 @@ if ($method === 'PUT') {
         (string)($payload['ga_id'] ?? ''),
         (string)($payload['gsc_verification'] ?? ''),
         json_encode($payload['social_links'] ?? new stdClass(), JSON_UNESCAPED_UNICODE),
+        (string)($payload['telegram_link'] ?? ''),
+        (string)($payload['whatsapp_number'] ?? ''),
     ]);
 
     json_response(['ok' => true]);

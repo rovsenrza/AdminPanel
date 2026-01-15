@@ -150,79 +150,8 @@
                         </div>
                         <div class="card-body">
                             <div id="categoryList">
-                                <div class="category-item" data-id="1">
-                                    <div class="category-info">
-                                        <i class="fas fa-grip-vertical drag-handle"></i>
-                                        <span><strong>Technology</strong> (ID: 1)</span>
-                                    </div>
-                                    <div class="category-actions">
-                                        <button class="btn btn-sm btn-primary" onclick="editCategory(1)">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-danger" onclick="deleteCategory(1)">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div class="category-item child" data-id="2" data-parent="1">
-                                    <div class="category-info">
-                                        <i class="fas fa-grip-vertical drag-handle"></i>
-                                        <span><strong>Software</strong> (ID: 2) - Child of Technology</span>
-                                    </div>
-                                    <div class="category-actions">
-                                        <button class="btn btn-sm btn-primary" onclick="editCategory(2)">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-danger" onclick="deleteCategory(2)">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div class="category-item child" data-id="3" data-parent="1">
-                                    <div class="category-info">
-                                        <i class="fas fa-grip-vertical drag-handle"></i>
-                                        <span><strong>Hardware</strong> (ID: 3) - Child of Technology</span>
-                                    </div>
-                                    <div class="category-actions">
-                                        <button class="btn btn-sm btn-primary" onclick="editCategory(3)">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-danger" onclick="deleteCategory(3)">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div class="category-item" data-id="4">
-                                    <div class="category-info">
-                                        <i class="fas fa-grip-vertical drag-handle"></i>
-                                        <span><strong>Business</strong> (ID: 4)</span>
-                                    </div>
-                                    <div class="category-actions">
-                                        <button class="btn btn-sm btn-primary" onclick="editCategory(4)">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-danger" onclick="deleteCategory(4)">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div class="category-item" data-id="5">
-                                    <div class="category-info">
-                                        <i class="fas fa-grip-vertical drag-handle"></i>
-                                        <span><strong>Sports</strong> (ID: 5)</span>
-                                    </div>
-                                    <div class="category-actions">
-                                        <button class="btn btn-sm btn-primary" onclick="editCategory(5)">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-danger" onclick="deleteCategory(5)">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
+                                <div class="text-center text-muted py-4">
+                                    <span class="spinner-border spinner-border-sm"></span> Loading categories...
                                 </div>
                             </div>
                         </div>
@@ -255,9 +184,6 @@
                             <label class="form-label">Parent Category</label>
                             <select class="form-select" id="editCategoryParent">
                                 <option value="">None (Main Category)</option>
-                                <option value="1">Technology</option>
-                                <option value="4">Business</option>
-                                <option value="5">Sports</option>
                             </select>
                         </div>
                         <div class="mb-3">
@@ -267,6 +193,10 @@
                         <div class="mb-3">
                             <label class="form-label">Meta Description</label>
                             <textarea class="form-control" id="editCategoryMetaDesc" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Meta Keywords</label>
+                            <input type="text" class="form-control" id="editCategoryMetaKeywords" placeholder="keyword1, keyword2">
                         </div>
                     </form>
                 </div>

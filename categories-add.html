@@ -160,9 +160,6 @@
                                             <label class="form-label">Parent Category</label>
                                             <select class="form-select" id="parentCategory">
                                                 <option value="">None (Main Category)</option>
-                                                <option value="1">Technology</option>
-                                                <option value="4">Business</option>
-                                                <option value="5">Sports</option>
                                             </select>
                                         </div>
                                     </div>
@@ -180,18 +177,32 @@
                                 </div>
 
                                 <div class="mb-3">
+                                    <label class="form-label">Category Icons</label>
+                                    <div id="iconInputsContainer">
+                                        <div class="icon-input-row d-flex gap-2 mb-2">
+                                            <input type="file" class="form-control" accept="image/*" onchange="previewIcon(this)">
+                                            <img src="" alt="" class="icon-preview" style="width:40px;height:40px;object-fit:cover;display:none;border-radius:4px;">
+                                            <button type="button" class="btn btn-success btn-sm" onclick="addIconInput()">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">Upload category icons (optional). Click + to add more.</small>
+                                </div>
+
+                                <div class="mb-3">
                                     <label class="form-label">Meta Title</label>
-                                    <input type="text" class="form-control" id="categoryMetaTitle" placeholder="SEO meta title">
+                                    <input type="text" class="form-control" id="categoryMetaTitle" placeholder="SEO meta title (auto-generated if empty)">
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Meta Description</label>
-                                    <textarea class="form-control" id="categoryMetaDesc" rows="2" placeholder="SEO meta description"></textarea>
+                                    <textarea class="form-control" id="categoryMetaDesc" rows="2" placeholder="SEO meta description (auto-generated if empty)"></textarea>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Meta Keywords</label>
-                                    <input type="text" class="form-control" id="categoryMetaKeywords" placeholder="keyword1, keyword2, keyword3">
+                                    <input type="text" class="form-control" id="categoryMetaKeywords" placeholder="keyword1, keyword2 (auto-generated if empty)">
                                 </div>
 
                                 <div class="d-flex gap-2">
@@ -213,6 +224,100 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="assets/js/main.js"></script>
     <script>
+        let categories = [];
+        
+        document.addEventListener('DOMContentLoaded', loadParentCategories);
+        
+        async function loadParentCategories() {
+            try {
+                const res = await fetch('/backend/api/categories', { credentials: 'include' });
+                const data = await res.json();
+                categories = data.items || [];
+                
+                const select = document.getElementById('parentCategory');
+                select.innerHTML = '<option value="">None (Main Category)</option>';
+                categories.filter(c => !c.parent_id).forEach(cat => {
+                    select.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
+                });
+            } catch (err) {
+                console.error('Failed to load categories:', err);
+            }
+        }
+        
+        function addIconInput() {
+            const container = document.getElementById('iconInputsContainer');
+            const row = document.createElement('div');
+            row.className = 'icon-input-row d-flex gap-2 mb-2';
+            row.innerHTML = `
+                <input type="file" class="form-control" accept="image/*" onchange="previewIcon(this)">
+                <img src="" alt="" class="icon-preview" style="width:40px;height:40px;object-fit:cover;display:none;border-radius:4px;">
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeIconInput(this)">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+            container.appendChild(row);
+        }
+        
+        function removeIconInput(btn) {
+            btn.closest('.icon-input-row').remove();
+        }
+        
+        function previewIcon(input) {
+            const preview = input.nextElementSibling;
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        
+        function generateMetaTags() {
+            const name = document.getElementById('categoryName').value.trim();
+            const description = document.getElementById('categoryDescription').value.trim();
+            
+            if (!document.getElementById('categoryMetaTitle').value.trim()) {
+                document.getElementById('categoryMetaTitle').value = name;
+            }
+            if (!document.getElementById('categoryMetaDesc').value.trim() && description) {
+                document.getElementById('categoryMetaDesc').value = description.substring(0, 160);
+            }
+            if (!document.getElementById('categoryMetaKeywords').value.trim() && name) {
+                const words = name.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+                document.getElementById('categoryMetaKeywords').value = words.join(', ');
+            }
+        }
+        
+        async function uploadIcons() {
+            const iconPaths = [];
+            const inputs = document.querySelectorAll('#iconInputsContainer input[type="file"]');
+            
+            for (const input of inputs) {
+                if (input.files && input.files[0]) {
+                    const formData = new FormData();
+                    formData.append('file', input.files[0]);
+                    formData.append('type', 'category');
+                    
+                    try {
+                        const res = await fetch('/backend/api/upload', {
+                            method: 'POST',
+                            credentials: 'include',
+                            body: formData
+                        });
+                        if (res.ok) {
+                            const data = await res.json();
+                            iconPaths.push(data.path);
+                        }
+                    } catch (err) {
+                        console.error('Icon upload failed:', err);
+                    }
+                }
+            }
+            return iconPaths;
+        }
+        
         document.getElementById('addCategoryForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -220,6 +325,10 @@
             const slug = document.getElementById('categorySlug').value.trim();
             const parent = document.getElementById('parentCategory').value;
             const description = document.getElementById('categoryDescription').value.trim();
+            
+            // Auto-generate meta tags if empty
+            generateMetaTags();
+            
             const metaTitle = document.getElementById('categoryMetaTitle').value.trim();
             const metaDesc = document.getElementById('categoryMetaDesc').value.trim();
             const metaKeywords = document.getElementById('categoryMetaKeywords').value.trim();
@@ -228,6 +337,9 @@
                 showAlert('Please enter a category name', 'danger');
                 return;
             }
+            
+            // Upload icons
+            const iconPaths = await uploadIcons();
             
             try {
                 const res = await fetch('/backend/api/categories', {
@@ -239,6 +351,7 @@
                         slug,
                         parent_id: parent ? parseInt(parent) : null,
                         description,
+                        icon_paths: iconPaths.length > 0 ? iconPaths : null,
                         meta_title: metaTitle,
                         meta_description: metaDesc,
                         meta_keywords: metaKeywords

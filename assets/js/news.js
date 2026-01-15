@@ -3,12 +3,34 @@ let fullDescriptionEditor;
 let extraFieldCounter = 0;
 let imagePreviews = [];
 let existingSlugs = [];
+let categories = [];
 
 document.addEventListener('DOMContentLoaded', function() {
+    loadCategories();
     initEditors();
     initForm();
     initSlugGeneration();
 });
+
+async function loadCategories() {
+    const select = document.getElementById('newsCategory');
+    if (!select) return;
+    
+    try {
+        const res = await fetch('/backend/api/categories', { credentials: 'include' });
+        const data = await res.json();
+        categories = data.items || [];
+        
+        select.innerHTML = '<option value="">Select Category</option>';
+        categories.forEach(cat => {
+            const prefix = cat.parent_id ? '— ' : '';
+            select.innerHTML += `<option value="${cat.id}">${prefix}${cat.name}</option>`;
+        });
+    } catch (err) {
+        select.innerHTML = '<option value="">Failed to load categories</option>';
+        console.error('Failed to load categories:', err);
+    }
+}
 
 function initEditors() {
     const toolbarOptions = [
