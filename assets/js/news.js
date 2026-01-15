@@ -5,12 +5,20 @@ let imagePreviews = [];
 let existingSlugs = [];
 let categories = [];
 
-document.addEventListener('DOMContentLoaded', function() {
+function boot() {
+    // Always attempt to load categories first
     loadCategories();
-    initEditors();
-    initForm();
-    initSlugGeneration();
-});
+    // Don’t let editor/form errors block category loading
+    try { initEditors(); } catch (e) { console.error('initEditors failed:', e); }
+    try { initForm(); } catch (e) { console.error('initForm failed:', e); }
+    try { initSlugGeneration(); } catch (e) { console.error('initSlugGeneration failed:', e); }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+} else {
+    boot();
+}
 
 async function loadCategories() {
     const select = document.getElementById('newsCategory');

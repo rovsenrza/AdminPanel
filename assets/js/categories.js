@@ -36,32 +36,43 @@ function renderCategories() {
         return;
     }
     
-    // Sort by sort_order, then group by parent
     const sorted = [...categories].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
-    const parentCats = sorted.filter(c => !c.parent_id);
-    const childCats = sorted.filter(c => c.parent_id);
+    const byId = new Map(sorted.map(c => [c.id, c]));
+    const childrenByParent = new Map();
+    
+    for (const c of sorted) {
+        const key = c.parent_id ? c.parent_id : 0;
+        if (!childrenByParent.has(key)) childrenByParent.set(key, []);
+        childrenByParent.get(key).push(c);
+    }
+    
+    // Roots are those with no parent OR with missing parent
+    const roots = sorted.filter(c => !c.parent_id || !byId.has(c.parent_id));
     
     let html = '';
-    parentCats.forEach(cat => {
-        html += renderCategoryItem(cat, false);
-        // Add children
-        childCats.filter(c => c.parent_id === cat.id).forEach(child => {
-            html += renderCategoryItem(child, true);
-        });
-    });
-    // Orphan children (parent deleted)
-    childCats.filter(c => !parentCats.find(p => p.id === c.parent_id)).forEach(child => {
-        html += renderCategoryItem(child, true);
-    });
+    for (const root of roots) {
+        html += renderCategoryTree(root, 0, childrenByParent);
+    }
     
     list.innerHTML = html;
     initSortable();
 }
 
-function renderCategoryItem(cat, isChild) {
+function renderCategoryTree(cat, level, childrenByParent) {
+    let html = renderCategoryItem(cat, level);
+    const children = childrenByParent.get(cat.id) || [];
+    for (const child of children) {
+        html += renderCategoryTree(child, level + 1, childrenByParent);
+    }
+    return html;
+}
+
+function renderCategoryItem(cat, level) {
     const parentName = cat.parent_id ? categories.find(c => c.id === cat.parent_id)?.name : null;
+    const isChild = level > 0;
+    const indentStyle = isChild ? ` style="margin-left:${level * 2}rem"` : '';
     return `
-        <div class="category-item ${isChild ? 'child' : ''}" data-id="${cat.id}" data-parent="${cat.parent_id || ''}">
+        <div class="category-item ${isChild ? 'child' : ''}" data-id="${cat.id}" data-parent="${cat.parent_id || ''}" data-level="${level}"${indentStyle}>
             <div class="category-content">
                 <span class="drag-handle"><i class="fas fa-grip-vertical"></i></span>
                 <div class="category-info">
@@ -223,7 +234,7 @@ window.editCategory = function(id) {
     bsModal.show();
 }
 
-async function saveCategoryEdit() {
+window.saveCategoryEdit = async function() {
     const modal = document.getElementById('editCategoryModal');
     const id = parseInt(modal.getAttribute('data-edit-id'));
     
