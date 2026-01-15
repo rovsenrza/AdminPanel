@@ -1,0 +1,30 @@
+# Admin Panel Root .htaccess
+
+# Prevent directory listing
+Options -Indexes
+
+# Enable URL rewriting
+RewriteEngine On
+
+# Force HTTPS (uncomment in production)
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Protect .env files
+<FilesMatch "^\.env">
+    Require all denied
+</FilesMatch>
+
+# Allow access to static assets
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^(assets|uploads)/.*$ - [L]
+
+# Route /backend/* to backend/index.php
+RewriteCond %{REQUEST_URI} ^/backend/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^backend/(.*)$ backend/index.php [QSA,L]
+
+# Serve HTML files directly
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule \.(html|css|js|png|jpg|jpeg|gif|ico|svg|webp|woff|woff2|ttf|eot)$ - [L]

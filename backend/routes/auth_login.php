@@ -6,8 +6,9 @@ require_method('POST');
 
 csrf_verify_or_fail();
 
-$email = post_str('email');
-$password = post_str('password');
+$email = trim((string)($_POST['email'] ?? ''));
+$password = (string)($_POST['password'] ?? '');
+$remember = !empty($_POST['remember']);
 
 if ($email === '' || $password === '') {
     // For HTML form submit, redirect back with query param
@@ -15,7 +16,7 @@ if ($email === '' || $password === '') {
     exit;
 }
 
-$user = login_with_email_password($email, $password);
+$user = login_with_email_password($email, $password, $remember);
 if (!$user) {
     header('Location: /login.html?error=1');
     exit;

@@ -7,6 +7,9 @@ require __DIR__ . '/lib/bootstrap.php';
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/';
 $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
 
+// Debug logging (remove in production)
+error_log("Backend Router - Path: {$path}, Method: {$method}");
+
 $base = '/backend';
 if (str_starts_with($path, $base)) {
     $path = substr($path, strlen($base));
@@ -14,6 +17,8 @@ if (str_starts_with($path, $base)) {
 if ($path === '') {
     $path = '/';
 }
+
+error_log("Backend Router - After base strip: {$path}");
 
 // Simple router
 switch (true) {

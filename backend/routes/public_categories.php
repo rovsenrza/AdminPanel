@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_method('GET');
+require_api_key();
 
 $rows = db()->query('
     SELECT id, parent_id, name, slug, description, meta_title, meta_description, meta_keywords, sort_order

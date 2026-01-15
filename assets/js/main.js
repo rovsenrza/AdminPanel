@@ -18,14 +18,14 @@ function initAuthGuard() {
 
     fetch('/backend/api/me', { credentials: 'include' })
         .then(res => {
-            if (res.status === 401) {
+            if (!res.ok || res.status === 401) {
                 window.location.href = '/login.html';
                 return null;
             }
             return res.json();
         })
         .catch(() => {
-            // If backend is unreachable, keep page accessible for now.
+            window.location.href = '/login.html';
         });
 }
 

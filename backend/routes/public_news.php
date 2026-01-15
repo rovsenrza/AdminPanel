@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_method('GET');
+require_api_key();
 
 $slug = $_GET['slug'] ?? '';
 $categoryId = isset($_GET['category_id']) ? (int)$_GET['category_id'] : null;

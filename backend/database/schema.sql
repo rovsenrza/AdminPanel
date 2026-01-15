@@ -6,10 +6,13 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(190) NOT NULL,
   phone VARCHAR(50) NULL,
   password_hash VARCHAR(255) NOT NULL,
+  remember_token VARCHAR(64) NULL,
+  remember_expiry DATETIME NULL,
   created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
-  UNIQUE KEY uniq_users_email (email)
+  UNIQUE KEY uniq_users_email (email),
+  KEY idx_users_remember_token (remember_token)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS categories (
@@ -77,24 +80,25 @@ CREATE TABLE IF NOT EXISTS news_extra_fields (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS settings (
-  id TINYINT UNSIGNED NOT NULL,
-  site_title VARCHAR(255) NULL,
-  domain VARCHAR(255) NULL,
-  language VARCHAR(10) NOT NULL DEFAULT 'en',
-  maintenance TINYINT(1) NOT NULL DEFAULT 0,
-  news_per_page INT NOT NULL DEFAULT 10,
-  seo_default_title VARCHAR(255) NULL,
-  seo_default_description VARCHAR(255) NULL,
-  seo_default_keywords VARCHAR(255) NULL,
-  ga_id VARCHAR(100) NULL,
-  gsc_verification VARCHAR(255) NULL,
-  social_links_json JSON NULL,
-  created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    site_title VARCHAR(255),
+    domain VARCHAR(255),
+    language VARCHAR(10) DEFAULT 'en',
+    news_per_page INT DEFAULT 10,
+    maintenance TINYINT(1) DEFAULT 0,
+    seo_default_title VARCHAR(255),
+    seo_default_description TEXT,
+    seo_default_keywords TEXT,
+    ga_id VARCHAR(50),
+    gsc_verification VARCHAR(100),
+    social_links_json TEXT,
+    api_key VARCHAR(64),
+    api_secret VARCHAR(64),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_api_key (api_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO settings (id, site_title, domain, language, maintenance, news_per_page)
 VALUES (1, 'Admin Panel', '', 'en', 0, 10)
 ON DUPLICATE KEY UPDATE id=id;
-

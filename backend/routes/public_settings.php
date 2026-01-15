@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_method('GET');
+require_api_key();
 
 $row = db()->query('
     SELECT site_title, domain, language, seo_default_title, seo_default_description, seo_default_keywords, social_links_json

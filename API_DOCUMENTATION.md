@@ -2,12 +2,30 @@
 
 ## Public API Endpoints (For Your Website)
 
-These endpoints are **read-only** and **do not require authentication**. Use them to fetch data from your admin panel for display on your website.
+These endpoints are **read-only** and require **API Key authentication**. Use them to fetch data from your admin panel for display on your website.
 
 ### Base URL
 ```
 https://yourdomain.com/backend
 ```
+
+### Authentication
+
+All public API endpoints require an API key. You'll receive your API key during installation.
+
+**Two ways to provide the API key:**
+
+1. **Query parameter (recommended):**
+```
+GET /backend/public/news?api_key=YOUR_API_KEY_HERE
+```
+
+2. **HTTP Header:**
+```
+X-API-Key: YOUR_API_KEY_HERE
+```
+
+⚠️ **Security Note:** Keep your API key secure. Only use it in server-side code, never expose it in client-side JavaScript on public websites.
 
 ---
 
@@ -38,7 +56,9 @@ https://yourdomain.com/backend
 
 **Example Usage:**
 ```javascript
-fetch('https://yourdomain.com/backend/public/categories')
+const API_KEY = 'your_api_key_here';
+
+fetch(`https://yourdomain.com/backend/public/categories?api_key=${API_KEY}`)
   .then(res => res.json())
   .then(data => {
     console.log(data.categories);
@@ -86,8 +106,10 @@ fetch('https://yourdomain.com/backend/public/categories')
 
 **Example Usage:**
 ```javascript
+const API_KEY = 'your_api_key_here';
+
 // Get all news (page 1)
-fetch('https://yourdomain.com/backend/public/news')
+fetch(`https://yourdomain.com/backend/public/news?api_key=${API_KEY}`)
   .then(res => res.json())
   .then(data => {
     console.log(data.news);
@@ -95,7 +117,7 @@ fetch('https://yourdomain.com/backend/public/news')
   });
 
 // Get news from specific category
-fetch('https://yourdomain.com/backend/public/news?category_id=1&page=1&per_page=20')
+fetch(`https://yourdomain.com/backend/public/news?api_key=${API_KEY}&category_id=1&page=1&per_page=20`)
   .then(res => res.json())
   .then(data => {
     console.log(data.news);
@@ -148,7 +170,9 @@ fetch('https://yourdomain.com/backend/public/news?category_id=1&page=1&per_page=
 
 **Example Usage:**
 ```javascript
-fetch('https://yourdomain.com/backend/public/news?slug=breaking-tech-news')
+const API_KEY = 'your_api_key_here';
+
+fetch(`https://yourdomain.com/backend/public/news?api_key=${API_KEY}&slug=breaking-tech-news`)
   .then(res => res.json())
   .then(data => {
     console.log(data.news);
@@ -186,7 +210,9 @@ fetch('https://yourdomain.com/backend/public/news?slug=breaking-tech-news')
 
 **Example Usage:**
 ```javascript
-fetch('https://yourdomain.com/backend/public/settings')
+const API_KEY = 'your_api_key_here';
+
+fetch(`https://yourdomain.com/backend/public/settings?api_key=${API_KEY}`)
   .then(res => res.json())
   .then(data => {
     document.title = data.settings.site_title;
@@ -212,10 +238,11 @@ fetch('https://yourdomain.com/backend/public/settings')
 
     <script>
         const API_BASE = 'https://yourdomain.com/backend';
+        const API_KEY = 'your_api_key_here'; // Replace with your actual API key
 
         // Load categories
         async function loadCategories() {
-            const res = await fetch(`${API_BASE}/public/categories`);
+            const res = await fetch(`${API_BASE}/public/categories?api_key=${API_KEY}`);
             const data = await res.json();
             
             const html = data.categories.map(cat => `
@@ -227,7 +254,7 @@ fetch('https://yourdomain.com/backend/public/settings')
 
         // Load news list
         async function loadNews(page = 1) {
-            const res = await fetch(`${API_BASE}/public/news?page=${page}&per_page=10`);
+            const res = await fetch(`${API_BASE}/public/news?api_key=${API_KEY}&page=${page}&per_page=10`);
             const data = await res.json();
             
             const html = data.news.map(news => `
@@ -244,7 +271,7 @@ fetch('https://yourdomain.com/backend/public/settings')
 
         // Load single news
         async function loadSingleNews(slug) {
-            const res = await fetch(`${API_BASE}/public/news?slug=${slug}`);
+            const res = await fetch(`${API_BASE}/public/news?api_key=${API_KEY}&slug=${slug}`);
             const data = await res.json();
             const news = data.news;
             
@@ -312,9 +339,17 @@ All endpoints return JSON error responses with appropriate HTTP status codes:
 
 Common status codes:
 - `200` - Success
+- `401` - Unauthorized (missing or invalid API key)
 - `404` - Not found
 - `422` - Validation error
 - `500` - Server error
+
+**Example - Missing API Key:**
+```json
+{
+  "error": "Invalid or missing API key"
+}
+```
 
 ---
 
