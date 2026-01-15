@@ -17,7 +17,7 @@ RewriteEngine On
 
 # Allow access to static assets
 RewriteCond %{REQUEST_FILENAME} -f
-RewriteRule ^(assets|uploads)/.*$ - [L]
+RewriteRule ^(admin/admin-assets|uploads)/.*$ - [L]
 
 # Allow direct access to backend PHP files that exist
 RewriteCond %{REQUEST_FILENAME} -f
@@ -29,6 +29,19 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^backend/(.*)$ backend/index.php [QSA,L]
 
-# Serve HTML files directly
+# --- Admin Panel Routes ---
+# /admin -> admin/index.html
+RewriteRule ^admin/?$ admin/index.html [L]
+
+# /admin/login -> admin/login.html
+RewriteRule ^admin/login/?$ admin/login.html [L]
+
+# /admin/page -> admin/page.html
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} ^/admin/
+RewriteRule ^admin/([^/]+)/?$ admin/$1.html [L]
+
+# Serve HTML files directly (if accessed with .html extension)
 RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule \.(html|css|js|png|jpg|jpeg|gif|ico|svg|webp|woff|woff2|ttf|eot)$ - [L]

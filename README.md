@@ -213,24 +213,14 @@ fetch(`${API_BASE}/public/news?api_key=${API_KEY}&page=1`)
 
 ```
 adminpanel/
-├── index.html              # Dashboard
-├── login.html              # Giriş səhifəsi
-├── categories.html         # Kateqoriya siyahısı
-├── categories-add.html     # Kateqoriya əlavə et
-├── news.html               # Xəbər siyahısı
-├── news-add.html           # Xəbər əlavə et
-├── settings.html           # Sayt parametrləri
-├── profile.html            # İstifadəçi profili
-├── .htaccess               # Kök yönləndirmə qaydaları
-├── assets/
-│   ├── css/style.css
-│   └── js/
-│       ├── main.js         # Auth guard, tema, yan panel
-│       ├── categories.js   # Kateqoriya CRUD
-│       └── news.js         # Xəbər CRUD
-├── uploads/
-│   └── news/               # Yüklənən şəkillər
-└── backend/
+├── index.html              # Main Site (formerly API Test)
+├── admin/                  # Admin Panel
+│   ├── index.html          # Dashboard
+│   ├── login.html          # Login
+│   ├── ...                 # Other admin pages
+│   └── admin-assets/       # Admin-specific assets (CSS/JS)
+├── uploads/                # User uploaded content
+└── backend/                # PHP Backend API
     ├── .htaccess           # Backend yönləndirməsi
     ├── .env                # Verilənlər bazası konfiqurasiyası (bunu yaradın)
     ├── index.php           # API router

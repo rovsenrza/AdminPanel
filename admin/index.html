@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>News - Admin Panel</title>
+    <title>Dashboard </title>
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="/admin/admin-assets/css/style.css">
 </head>
 <body>
     <div class="layout-wrapper">
@@ -15,7 +15,7 @@
             <div class="app-brand">
                 <a href="index.html" class="app-brand-logo">
                     <i class="fas fa-cube"></i>
-                    <span>Admin Panel</span>
+                    <span>Website Name</span>
                 </a>
                 <button class="sidebar-toggle-btn" id="sidebarToggle">
                     <i class="fas fa-times"></i>
@@ -27,7 +27,7 @@
                     <li class="menu-header">Main</li>
                     
                     <li class="menu-item">
-                        <a href="index.html" class="menu-link">
+                        <a href="index.html" class="menu-link active">
                             <i class="menu-icon fas fa-home"></i>
                             <span>Dashboard</span>
                         </a>
@@ -55,7 +55,7 @@
                         </ul>
                     </li>
 
-                    <li class="menu-item has-sub open">
+                    <li class="menu-item has-sub">
                         <a href="#" class="menu-link">
                             <i class="menu-icon fas fa-newspaper"></i>
                             <span>News</span>
@@ -63,7 +63,7 @@
                         </a>
                         <ul class="menu-sub">
                             <li class="menu-item">
-                                <a href="news.html" class="menu-link active">
+                                <a href="news.html" class="menu-link">
                                     <span>All News</span>
                                 </a>
                             </li>
@@ -132,21 +132,51 @@
             <div class="content-wrapper">
                 <div class="container-fluid">
                     <div class="page-header">
-                        <h1 class="page-title">News</h1>
+                        <h1 class="page-title">Dashboard</h1>
                         <nav aria-label="breadcrumb">
                             <ol class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
-                                <li class="breadcrumb-item active">News</li>
+                                <li class="breadcrumb-item active">Dashboard</li>
                             </ol>
                         </nav>
                     </div>
 
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <h6 class="text-muted mb-2">Total Categories</h6>
+                                            <h2 class="mb-0" id="categoriesCount"><span class="spinner-border spinner-border-sm"></span></h2>
+                                        </div>
+                                        <div style="font-size: 2.5rem; color: var(--primary-color);">
+                                            <i class="fas fa-folder"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <h6 class="text-muted mb-2">Total News</h6>
+                                            <h2 class="mb-0" id="newsCount"><span class="spinner-border spinner-border-sm"></span></h2>
+                                        </div>
+                                        <div style="font-size: 2.5rem; color: var(--success-color);">
+                                            <i class="fas fa-newspaper"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="card-title">All News</h5>
-                            <a href="news-add.html" class="btn btn-primary">
-                                <i class="fas fa-plus"></i> Add News
-                            </a>
+                            <h5 class="card-title">Recent News</h5>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
@@ -154,7 +184,6 @@
                                     <thead>
                                         <tr>
                                             <th>ID</th>
-                                            <th>Image</th>
                                             <th>Title</th>
                                             <th>Category</th>
                                             <th>Status</th>
@@ -162,10 +191,10 @@
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="newsTableBody">
+                                    <tbody id="recentNewsBody">
                                         <tr>
-                                            <td colspan="7" class="text-center">
-                                                <span class="spinner-border spinner-border-sm"></span> Loading news...
+                                            <td colspan="6" class="text-center">
+                                                <span class="spinner-border spinner-border-sm"></span> Loading...
                                             </td>
                                         </tr>
                                     </tbody>
@@ -179,74 +208,71 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/js/main.js"></script>
+    <script src="/admin/admin-assets/js/main.js"></script>
     <script>
-        let categories = [];
+        document.addEventListener('DOMContentLoaded', loadDashboardData);
         
-        document.addEventListener('DOMContentLoaded', async function() {
-            await loadCategories();
-            await loadNews();
-        });
+        async function loadDashboardData() {
+            await Promise.all([
+                loadCategoriesCount(),
+                loadNewsCount(),
+                loadRecentNews()
+            ]);
+        }
         
-        async function loadCategories() {
+        async function loadCategoriesCount() {
             try {
                 const res = await fetch('/backend/api/categories', { credentials: 'include' });
                 const data = await res.json();
-                categories = data.items || [];
+                const count = data.items ? data.items.length : 0;
+                document.getElementById('categoriesCount').textContent = count;
             } catch (err) {
-                console.error('Failed to load categories:', err);
+                document.getElementById('categoriesCount').textContent = '0';
             }
         }
         
-        async function loadNews() {
-            const tbody = document.getElementById('newsTableBody');
-            
+        async function loadNewsCount() {
             try {
                 const res = await fetch('/backend/api/news', { credentials: 'include' });
+                const data = await res.json();
+                const count = data.items ? data.items.length : 0;
+                document.getElementById('newsCount').textContent = count;
+            } catch (err) {
+                document.getElementById('newsCount').textContent = '0';
+            }
+        }
+        
+        async function loadRecentNews() {
+            const tbody = document.getElementById('recentNewsBody');
+            try {
+                const res = await fetch('/backend/api/news?limit=3', { credentials: 'include' });
                 const data = await res.json();
                 const news = data.items || [];
                 
                 if (news.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No news articles yet. <a href="news-add.html">Add your first news</a></td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No news articles yet</td></tr>';
                     return;
                 }
                 
-                tbody.innerHTML = news.map(item => {
-                    const imgSrc = item.images && item.images[0] ? item.images[0].path : '';
-                    // Show multiple categories if category_ids exists
-                    let categoryBadges = '<span class="badge badge-secondary">Uncategorized</span>';
-                    if (item.category_ids) {
-                        const catIds = item.category_ids.split(',').map(id => parseInt(id.trim()));
-                        categoryBadges = catIds.map(catId => {
-                            const cat = categories.find(c => c.id === catId);
-                            return cat ? `<span class="badge badge-primary me-1">${escapeHtml(cat.name)}</span>` : '';
-                        }).join('');
-                    } else if (item.category_name) {
-                        categoryBadges = `<span class="badge badge-primary">${escapeHtml(item.category_name)}</span>`;
-                    }
-                    return `
-                        <tr>
-                            <td>#${String(item.id).padStart(3, '0')}</td>
-                            <td>
-                                ${imgSrc ? `<img src="${imgSrc}" alt="News" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">` : '<span class="text-muted">No image</span>'}
-                            </td>
-                            <td>${escapeHtml(item.title)}</td>
-                            <td>${categoryBadges}</td>
-                            <td><span class="badge ${item.published ? 'badge-success' : 'badge-secondary'}">${item.published ? 'Published' : 'Draft'}</span></td>
-                            <td>${item.created_at ? item.created_at.split(' ')[0] : '-'}</td>
-                            <td>
-                                <a href="news-add.html?id=${item.id}" class="btn btn-sm btn-primary btn-icon">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <button class="btn btn-sm btn-danger btn-icon" onclick="deleteNews(${item.id})">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
+                tbody.innerHTML = news.slice(0, 3).map(item => `
+                    <tr>
+                        <td>#${String(item.id).padStart(3, '0')}</td>
+                        <td>${escapeHtml(item.title)}</td>
+                        <td><span class="badge badge-primary">${escapeHtml(item.category_name || 'Uncategorized')}</span></td>
+                        <td><span class="badge ${item.published ? 'badge-success' : 'badge-secondary'}">${item.published ? 'Published' : 'Draft'}</span></td>
+                        <td>${item.created_at ? item.created_at.split(' ')[0] : '-'}</td>
+                        <td>
+                            <a href="news-add.html?id=${item.id}" class="btn btn-sm btn-primary btn-icon">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button class="btn btn-sm btn-danger btn-icon" onclick="deleteNews(${item.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
             } catch (err) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Failed to load news</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Failed to load news</td></tr>';
             }
         }
         
@@ -259,19 +285,16 @@
         
         async function deleteNews(id) {
             if (!confirm('Are you sure you want to delete this news?')) return;
-            
             try {
                 const res = await fetch(`/backend/api/news?id=${id}`, {
                     method: 'DELETE',
                     credentials: 'include'
                 });
-                
                 if (res.ok) {
                     showAlert('News deleted successfully!', 'success');
-                    loadNews();
+                    loadDashboardData();
                 } else {
-                    const data = await res.json();
-                    showAlert(data.error || 'Failed to delete news', 'danger');
+                    showAlert('Failed to delete news', 'danger');
                 }
             } catch (err) {
                 showAlert('Error deleting news', 'danger');
