@@ -1,12 +1,57 @@
 document.addEventListener('DOMContentLoaded', function() {
+    initAuthGuard();
     initMenuToggle();
     initModals();
     initTooltips();
     initThemeToggle();
     initSidebarToggle();
+    initLogout();
     loadThemePreference();
     loadSidebarState();
 });
+
+function initAuthGuard() {
+    const path = window.location.pathname || '';
+    if (path.endsWith('/login.html') || path.endsWith('login.html')) {
+        return;
+    }
+
+    fetch('/backend/api/me', { credentials: 'include' })
+        .then(res => {
+            if (res.status === 401) {
+                window.location.href = '/login.html';
+                return null;
+            }
+            return res.json();
+        })
+        .catch(() => {
+            // If backend is unreachable, keep page accessible for now.
+        });
+}
+
+function initLogout() {
+    const logoutLinks = Array.from(document.querySelectorAll('a.menu-link'))
+        .filter(a => {
+            const text = (a.textContent || '').trim().toLowerCase();
+            const hasIcon = !!a.querySelector('.fa-sign-out-alt');
+            return text === 'logout' || hasIcon;
+        });
+
+    logoutLinks.forEach(link => {
+        link.addEventListener('click', async function(e) {
+            e.preventDefault();
+            try {
+                await fetch('/backend/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+            } catch (err) {
+                // ignore
+            }
+            window.location.href = '/login.html';
+        });
+    });
+}
 
 function initMenuToggle() {
     const menuItems = document.querySelectorAll('.menu-item.has-sub');

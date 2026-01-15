@@ -213,6 +213,59 @@ Extra fields allow you to add custom data to news articles:
 
 This is a frontend template. To connect to your backend:
 
+## Included Backend (PHP + MySQL)
+
+This repo now includes a lightweight backend under `backend/` designed to run on WHM/cPanel (Apache + PHP + MySQL).
+
+### Backend URLs
+
+- `GET /backend/` – health message
+- `POST /backend/auth/login` – login (HTML form)
+- `POST /backend/auth/logout` – logout
+- `GET /backend/auth/csrf` – CSRF token for login form
+- `GET /backend/api/me` – session check (used by `assets/js/main.js` auth guard)
+- `GET|POST|PUT|DELETE /backend/api/categories`
+- `GET|POST|PUT|DELETE /backend/api/news`
+- `GET|PUT /backend/api/settings`
+- `PUT /backend/api/profile`
+
+### Configure environment variables (hosting)
+
+Set these on hosting (recommended), or via `.user.ini` / hosting environment settings:
+
+- `DB_HOST`
+- `DB_NAME`
+- `DB_USER`
+- `DB_PASS`
+- `DB_PORT` (optional, default `3306`)
+
+Installer protection:
+
+- `INSTALL_KEY` (required to run installer)
+
+### First-time install
+
+1. Create a MySQL database + user in cPanel and assign permissions.
+2. Set the DB env vars above.
+3. Set `INSTALL_KEY` to a long random value.
+4. Open:
+   - `/backend/install.php?key=YOUR_INSTALL_KEY`
+5. Create the first admin user in the installer form.
+6. After successful install:
+   - remove `INSTALL_KEY` or delete `/backend/install.php`
+
+### Login
+
+- Open `/login.html`
+- Login form posts to `/backend/auth/login`
+- On success you are redirected to `/index.html`
+
+### Notes
+
+- The frontend pages are protected by an auth guard in `assets/js/main.js`.
+  If `/backend/api/me` returns `401`, the user is redirected to `/login.html`.
+- Server-side upload endpoints are not implemented yet; current API focuses on auth + core CRUD.
+
 1. Update form submission handlers in `assets/js/news.js` and `assets/js/categories.js`
 2. Replace `console.log()` calls with actual API requests
 3. Implement authentication and authorization

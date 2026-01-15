@@ -213,28 +213,53 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="assets/js/main.js"></script>
     <script>
-        document.getElementById('addCategoryForm').addEventListener('submit', function(e) {
+        document.getElementById('addCategoryForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const formData = {
-                name: document.getElementById('categoryName').value,
-                parent: document.getElementById('parentCategory').value,
-                description: document.getElementById('categoryDescription').value,
-                slug: document.getElementById('categorySlug').value
-            };
+            const name = document.getElementById('categoryName').value.trim();
+            const slug = document.getElementById('categorySlug').value.trim();
+            const parent = document.getElementById('parentCategory').value;
+            const description = document.getElementById('categoryDescription').value.trim();
+            const metaTitle = document.getElementById('categoryMetaTitle').value.trim();
+            const metaDesc = document.getElementById('categoryMetaDesc').value.trim();
+            const metaKeywords = document.getElementById('categoryMetaKeywords').value.trim();
             
-            console.log('Adding category:', formData);
-            showAlert('Category added successfully!', 'success');
+            if (!name) {
+                showAlert('Please enter a category name', 'danger');
+                return;
+            }
             
-            setTimeout(() => {
-                window.location.href = 'categories.html';
-            }, 1500);
+            try {
+                const res = await fetch('/backend/api/categories', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name,
+                        slug,
+                        parent_id: parent ? parseInt(parent) : null,
+                        description,
+                        meta_title: metaTitle,
+                        meta_description: metaDesc,
+                        meta_keywords: metaKeywords
+                    })
+                });
+                
+                if (res.ok) {
+                    showAlert('Category added successfully!', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'categories.html';
+                    }, 1500);
+                } else {
+                    showAlert('Failed to add category', 'danger');
+                }
+            } catch (err) {
+                showAlert('Error adding category', 'danger');
+            }
         });
 
         document.getElementById('categoryName').addEventListener('input', function() {
-            const slug = this.value.toLowerCase()
-                .replace(/[^a-z0-9]+/g, '-')
-                .replace(/^-+|-+$/g, '');
+            const slug = generateSlug(this.value);
             document.getElementById('categorySlug').value = slug;
         });
     </script>

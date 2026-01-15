@@ -44,35 +44,91 @@ function initEditors() {
 }
 
 function initForm() {
-    document.getElementById('newsForm').addEventListener('submit', function(e) {
+    document.getElementById('newsForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        const title = document.getElementById('newsTitle').value;
+        const title = document.getElementById('newsTitle').value.trim();
+        const categoryId = parseInt(document.getElementById('newsCategory').value);
         const shortDesc = shortDescriptionEditor.root.innerText;
         const fullDesc = fullDescriptionEditor.root.innerText;
         
-        const formData = {
+        if (!title || !categoryId) {
+            showAlert('Please fill in required fields', 'danger');
+            return;
+        }
+        
+        const newsData = {
             title: title,
-            slug: document.getElementById('newsSlug').value,
-            category: document.getElementById('newsCategory').value,
-            shortDescription: shortDescriptionEditor.root.innerHTML,
-            fullDescription: fullDescriptionEditor.root.innerHTML,
-            videoUrl: document.getElementById('videoUrl').value,
+            slug: document.getElementById('newsSlug').value.trim(),
+            category_id: categoryId,
+            short_desc_html: shortDescriptionEditor.root.innerHTML,
+            full_desc_html: fullDescriptionEditor.root.innerHTML,
+            video_url: document.getElementById('videoUrl').value.trim(),
             published: document.getElementById('publishStatus').checked,
-            images: imagePreviews,
-            extraFields: getExtraFields(),
-            metaTitle: document.getElementById('newsMetaTitle').value || title,
-            metaDescription: document.getElementById('newsMetaDesc').value || shortDesc.substring(0, 160),
-            metaKeywords: document.getElementById('newsMetaKeywords').value || extractKeywords(title + ' ' + shortDesc + ' ' + fullDesc)
+            meta_title: document.getElementById('newsMetaTitle').value.trim() || title,
+            meta_description: document.getElementById('newsMetaDesc').value.trim() || shortDesc.substring(0, 160),
+            meta_keywords: document.getElementById('newsMetaKeywords').value.trim() || extractKeywords(title + ' ' + shortDesc + ' ' + fullDesc)
         };
         
-        console.log('Saving news:', formData);
-        showAlert('News saved successfully!', 'success');
-        
-        setTimeout(() => {
-            window.location.href = 'news.html';
-        }, 1500);
+        try {
+            const res = await fetch('/backend/api/news', {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newsData)
+            });
+            
+            if (res.ok) {
+                const data = await res.json();
+                const newsId = data.id;
+                
+                if (imagePreviews.length > 0) {
+                    await uploadNewsImages(newsId);
+                }
+                
+                showAlert('News saved successfully!', 'success');
+                setTimeout(() => {
+                    window.location.href = 'news.html';
+                }, 1500);
+            } else {
+                showAlert('Failed to save news', 'danger');
+            }
+        } catch (err) {
+            showAlert('Error saving news', 'danger');
+        }
     });
+}
+
+async function uploadNewsImages(newsId) {
+    for (const preview of imagePreviews) {
+        if (!preview.file) continue;
+        
+        const formData = new FormData();
+        formData.append('image', preview.file);
+        
+        try {
+            const res = await fetch('/backend/api/upload', {
+                method: 'POST',
+                credentials: 'include',
+                body: formData
+            });
+            
+            if (res.ok) {
+                const data = await res.json();
+                await fetch('/backend/api/news/images', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        news_id: newsId,
+                        path: data.path
+                    })
+                });
+            }
+        } catch (err) {
+            console.error('Failed to upload image:', err);
+        }
+    }
 }
 
 function initSlugGeneration() {
@@ -118,6 +174,35 @@ function addImageInput() {
         </button>
     `;
     container.appendChild(newInput);
+}
+
+function previewImage(input) {
+    if (!input.files || !input.files[0]) return;
+    
+    const file = input.files[0];
+    
+    if (!validateImageSize(file, 400)) {
+        input.value = '';
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        imagePreviews.push({
+            file: file,
+            dataUrl: e.target.result
+        });
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeImageInput(btn) {
+    const group = btn.closest('.image-input-group');
+    const index = Array.from(group.parentElement.children).indexOf(group);
+    if (index >= 0 && index < imagePreviews.length) {
+        imagePreviews.splice(index, 1);
+    }
+    group.remove();
 }
 
 function removeImageInput(button) {
@@ -278,27 +363,26 @@ function updateExtraFieldInput(select, fieldId) {
 
 function getExtraFields() {
     const fields = [];
-    const extraFieldDivs = document.querySelectorAll('.extra-field');
+    const fieldElements = document.querySelectorAll('.extra-field');
     
-    extraFieldDivs.forEach(div => {
-        const name = div.querySelector('.extra-field-name').value;
-        const type = div.querySelector('.extra-field-type').value;
+    fieldElements.forEach(field => {
+        const type = field.querySelector('[data-field-type]')?.getAttribute('data-field-type') || 'text';
+        const nameInput = field.querySelector('[data-field-name]');
+        const name = nameInput ? nameInput.value : '';
         let value = '';
         
-        const valueInput = div.querySelector('.extra-field-value');
-        if (valueInput) {
-            if (type === 'switch') {
-                value = valueInput.checked;
-            } else if (type === 'image' || type === 'file') {
-                value = valueInput.files[0] ? valueInput.files[0].name : '';
-            } else {
-                value = valueInput.value;
-            }
+        if (type === 'switch') {
+            const checkbox = field.querySelector('input[type="checkbox"]');
+            value = checkbox ? checkbox.checked : false;
+        } else if (type === 'image' || type === 'file') {
+            const fileInput = field.querySelector('input[type="file"]');
+            value = fileInput && fileInput.files[0] ? fileInput.files[0].name : '';
+        } else {
+            const input = field.querySelector('input, textarea, select');
+            value = input ? input.value : '';
         }
         
-        if (name) {
-            fields.push({ name, type, value });
-        }
+        fields.push({ type, name, value });
     });
     
     return fields;
