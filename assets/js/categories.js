@@ -222,6 +222,7 @@ window.editCategory = function(id) {
     
     const nameInput = document.getElementById('editCategoryName');
     const slugInput = document.getElementById('editCategorySlug');
+    const descriptionInput = document.getElementById('editCategoryDescription');
     const metaTitleInput = document.getElementById('editCategoryMetaTitle');
     const metaDescInput = document.getElementById('editCategoryMetaDesc');
     const metaKeywordsInput = document.getElementById('editCategoryMetaKeywords');
@@ -234,6 +235,12 @@ window.editCategory = function(id) {
     
     nameInput.value = cat.name || '';
     slugInput.value = cat.slug || '';
+    if (descriptionInput) {
+        descriptionInput.value = cat.description || '';
+    }
+    
+    // Load existing icons
+    loadEditCategoryIcons(cat.icon_paths);
     
     // Update parent dropdown before setting value
     updateParentDropdowns();
@@ -308,6 +315,103 @@ window.editCategory = function(id) {
     }
 }
 
+function loadEditCategoryIcons(iconPathsJson) {
+    const container = document.getElementById('editIconInputsContainer');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    let iconPaths = [];
+    if (iconPathsJson) {
+        try {
+            iconPaths = typeof iconPathsJson === 'string' ? JSON.parse(iconPathsJson) : iconPathsJson;
+            if (!Array.isArray(iconPaths)) iconPaths = [];
+        } catch (e) {
+            console.error('Error parsing icon_paths:', e);
+            iconPaths = [];
+        }
+    }
+    
+    // Display existing icons
+    iconPaths.forEach((iconPath, index) => {
+        const row = document.createElement('div');
+        row.className = 'icon-input-row d-flex gap-2 mb-2 align-items-center';
+        row.innerHTML = `
+            <img src="${escapeHtml(iconPath)}" alt="Icon" class="icon-preview" style="width:50px;height:50px;object-fit:cover;border-radius:4px;flex-shrink:0;">
+            <div class="flex-grow-1">
+                <input type="file" class="form-control form-control-sm" accept="image/*" onchange="previewEditIcon(this)" data-icon-index="${index}">
+                <small class="text-muted">${iconPath.split('/').pop()}</small>
+            </div>
+            <button type="button" class="btn btn-danger btn-sm" onclick="removeEditIconRow(this)">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+        row.setAttribute('data-icon-path', iconPath);
+        row.setAttribute('data-icon-type', 'existing');
+        container.appendChild(row);
+    });
+}
+
+window.addEditIconInput = function() {
+    const container = document.getElementById('editIconInputsContainer');
+    if (!container) return;
+    
+    const row = document.createElement('div');
+    row.className = 'icon-input-row d-flex gap-2 mb-2 align-items-center';
+    row.setAttribute('data-icon-type', 'new');
+    row.innerHTML = `
+        <div class="icon-preview-placeholder" style="width:50px;height:50px;flex-shrink:0;"></div>
+        <input type="file" class="form-control form-control-sm" accept="image/*" onchange="previewEditIcon(this)">
+        <img src="" alt="" class="icon-preview" style="width:50px;height:50px;object-fit:cover;display:none;border-radius:4px;flex-shrink:0;">
+        <button type="button" class="btn btn-danger btn-sm" onclick="removeEditIconRow(this)">
+            <i class="fas fa-trash"></i>
+        </button>
+    `;
+    container.appendChild(row);
+}
+
+window.previewEditIcon = function(input) {
+    if (!input.files || !input.files[0]) return;
+    
+    const file = input.files[0];
+    
+    // Basic file size validation (400KB max)
+    if (file.size > 400 * 1024) {
+        showAlert('Image size must be less than 400KB', 'danger');
+        input.value = '';
+        return;
+    }
+    
+    const row = input.closest('.icon-input-row');
+    if (!row) return;
+    
+    // If this is an existing icon being replaced, change type to 'replaced'
+    if (row.getAttribute('data-icon-type') === 'existing') {
+        row.setAttribute('data-icon-type', 'replaced');
+        row.removeAttribute('data-icon-path');
+    }
+    
+    const preview = row.querySelector('.icon-preview');
+    const placeholder = row.querySelector('.icon-preview-placeholder');
+    
+    if (preview) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+            if (placeholder) placeholder.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+window.removeEditIconRow = function(button, iconPath) {
+    const row = button.closest('.icon-input-row');
+    if (row) {
+        row.remove();
+    }
+}
+
 function generateKeywordsFromName(name) {
     const words = name.toLowerCase().split(/\s+/).filter(w => w.length > 2);
     return words.join(', ');
@@ -334,6 +438,7 @@ window.saveCategoryEdit = async function() {
     
     const nameInput = document.getElementById('editCategoryName');
     const slugInput = document.getElementById('editCategorySlug');
+    const descriptionInput = document.getElementById('editCategoryDescription');
     const parentSelect = document.getElementById('editCategoryParent');
     const metaTitleInput = document.getElementById('editCategoryMetaTitle');
     const metaDescInput = document.getElementById('editCategoryMetaDesc');
@@ -346,6 +451,7 @@ window.saveCategoryEdit = async function() {
     
     const name = nameInput.value.trim();
     const slug = slugInput.value.trim();
+    const description = descriptionInput ? descriptionInput.value.trim() : '';
     const parent = parentSelect ? parentSelect.value : '';
     const metaTitle = metaTitleInput ? metaTitleInput.value.trim() : '';
     const metaDesc = metaDescInput ? metaDescInput.value.trim() : '';
@@ -356,19 +462,63 @@ window.saveCategoryEdit = async function() {
         return;
     }
     
+    // Collect existing icon paths and upload new icons
+    const iconPaths = [];
+    const iconRows = document.querySelectorAll('#editIconInputsContainer .icon-input-row');
+    
+    for (const row of iconRows) {
+        const iconType = row.getAttribute('data-icon-type');
+        
+        if (iconType === 'existing') {
+            // Keep existing icon (not replaced)
+            const iconPath = row.getAttribute('data-icon-path');
+            if (iconPath) iconPaths.push(iconPath);
+        } else if (iconType === 'replaced' || iconType === 'new') {
+            // Upload new icon
+            const fileInput = row.querySelector('input[type="file"]');
+            if (fileInput && fileInput.files && fileInput.files[0]) {
+                try {
+                    const formData = new FormData();
+                    formData.append('file', fileInput.files[0]);
+                    formData.append('type', 'category');
+                    
+                    const uploadRes = await fetch('/backend/api/upload', {
+                        method: 'POST',
+                        credentials: 'include',
+                        body: formData
+                    });
+                    
+                    if (uploadRes.ok) {
+                        const uploadData = await uploadRes.json();
+                        iconPaths.push(uploadData.path);
+                    } else {
+                        const errorData = await uploadRes.json().catch(() => ({}));
+                        console.error('Icon upload failed:', errorData);
+                    }
+                } catch (uploadErr) {
+                    console.error('Error uploading icon:', uploadErr);
+                }
+            }
+        }
+    }
+    
     try {
+        const updateData = {
+            name,
+            slug,
+            description,
+            parent_id: parent ? parseInt(parent) : null,
+            meta_title: metaTitle,
+            meta_description: metaDesc,
+            meta_keywords: metaKeywords,
+            icon_paths: iconPaths.length > 0 ? iconPaths : [] // Always send icon_paths, even if empty
+        };
+        
         const res = await fetch(`/backend/api/categories?id=${id}`, {
             method: 'PUT',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                name,
-                slug,
-                parent_id: parent ? parseInt(parent) : null,
-                meta_title: metaTitle,
-                meta_description: metaDesc,
-                meta_keywords: metaKeywords
-            })
+            body: JSON.stringify(updateData)
         });
         
         if (res.ok) {

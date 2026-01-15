@@ -162,7 +162,7 @@
     </div>
 
     <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editCategoryModalLabel">Edit Category</h5>
@@ -179,10 +179,24 @@
                             <input type="text" class="form-control" id="editCategorySlug" required>
                         </div>
                         <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" id="editCategoryDescription" rows="4"></textarea>
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label">Parent Category</label>
                             <select class="form-select" id="editCategoryParent">
                                 <option value="">None (Main Category)</option>
                             </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Category Icons</label>
+                            <div id="editIconInputsContainer">
+                                <!-- Existing icons and new upload inputs will be added here -->
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="addEditIconInput()">
+                                <i class="fas fa-plus"></i> Add More Icons
+                            </button>
+                            <small class="text-muted d-block mt-1">Upload category icons (optional). Existing icons will be replaced if you upload new ones.</small>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Meta Title</label>
