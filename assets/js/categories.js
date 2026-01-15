@@ -172,14 +172,32 @@ function updateParentDropdowns() {
         if (!select) return;
         const currentValue = select.value;
         select.innerHTML = '<option value="">None (Main Category)</option>';
-        categories.filter(c => !c.parent_id).forEach(cat => {
+        
+        // Build full hierarchy - ALL categories (unlimited depth)
+        const sorted = [...categories].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+        const parentCats = sorted.filter(c => !c.parent_id);
+        
+        parentCats.forEach(cat => {
             select.innerHTML += `<option value="${cat.id}">${escapeHtml(cat.name)}</option>`;
+            // Add ALL children recursively
+            addChildOptionsToDropdown(select, cat.id, sorted, 1);
         });
+        
         select.value = currentValue;
     });
 }
 
-function editCategory(id) {
+function addChildOptionsToDropdown(select, parentId, allCategories, level) {
+    const children = allCategories.filter(c => c.parent_id === parentId);
+    const indent = '\u00A0\u00A0\u00A0'.repeat(level) + '— ';
+    children.forEach(child => {
+        select.innerHTML += `<option value="${child.id}">${indent}${escapeHtml(child.name)}</option>`;
+        // Recursively add ALL sub-children (unlimited depth)
+        addChildOptionsToDropdown(select, child.id, allCategories, level + 1);
+    });
+}
+
+window.editCategory = function(id) {
     const cat = categories.find(c => c.id === id);
     if (!cat) return;
     
@@ -248,7 +266,7 @@ async function saveCategoryEdit() {
     }
 }
 
-async function deleteCategory(id) {
+window.deleteCategory = async function(id) {
     if (!confirm('Are you sure you want to delete this category?')) return;
     
     try {

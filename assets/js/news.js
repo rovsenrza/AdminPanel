@@ -16,6 +16,8 @@ async function loadCategories() {
     const select = document.getElementById('newsCategory');
     if (!select) return;
     
+    select.innerHTML = '<option value="">Loading categories...</option>';
+    
     try {
         const res = await fetch('/backend/api/categories', { credentials: 'include' });
         const data = await res.json();
@@ -23,13 +25,18 @@ async function loadCategories() {
         
         select.innerHTML = '<option value="">Select Category</option>';
         
-        // Build hierarchy
+        if (categories.length === 0) {
+            select.innerHTML = '<option value="">No categories available</option>';
+            return;
+        }
+        
+        // Build full hierarchy - ALL categories (unlimited depth)
         const sorted = [...categories].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
         const parentCats = sorted.filter(c => !c.parent_id);
         
         parentCats.forEach(cat => {
             select.innerHTML += `<option value="${cat.id}">${escapeHtml(cat.name)}</option>`;
-            // Add children
+            // Add ALL children recursively (unlimited depth)
             addChildCategoryOptions(select, cat.id, sorted, 1);
         });
     } catch (err) {
@@ -43,7 +50,7 @@ function addChildCategoryOptions(select, parentId, allCategories, level) {
     const indent = '\u00A0\u00A0\u00A0'.repeat(level) + '— ';
     children.forEach(child => {
         select.innerHTML += `<option value="${child.id}">${indent}${escapeHtml(child.name)}</option>`;
-        // Recursively add sub-children
+        // Recursively add ALL sub-children (unlimited depth)
         addChildCategoryOptions(select, child.id, allCategories, level + 1);
     });
 }

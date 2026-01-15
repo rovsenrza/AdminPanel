@@ -237,17 +237,21 @@
                 const select = document.getElementById('parentCategory');
                 select.innerHTML = '<option value="">None (Main Category)</option>';
                 
-                // Build hierarchy
+                if (categories.length === 0) return;
+                
+                // Build full hierarchy - ALL categories can be parents
                 const sorted = [...categories].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
                 const parentCats = sorted.filter(c => !c.parent_id);
                 
                 parentCats.forEach(cat => {
                     select.innerHTML += `<option value="${cat.id}">${escapeHtml(cat.name)}</option>`;
-                    // Add children
+                    // Add ALL children recursively
                     addChildOptions(select, cat.id, sorted, 1);
                 });
             } catch (err) {
                 console.error('Failed to load categories:', err);
+                const select = document.getElementById('parentCategory');
+                if (select) select.innerHTML = '<option value="">Error loading categories</option>';
             }
         }
         
@@ -256,7 +260,7 @@
             const indent = '\u00A0\u00A0\u00A0'.repeat(level) + '— ';
             children.forEach(child => {
                 select.innerHTML += `<option value="${child.id}">${indent}${escapeHtml(child.name)}</option>`;
-                // Recursively add sub-children
+                // Recursively add ALL sub-children (unlimited depth)
                 addChildOptions(select, child.id, allCategories, level + 1);
             });
         }
