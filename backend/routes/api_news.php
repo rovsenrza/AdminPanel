@@ -7,6 +7,27 @@ require_auth();
 $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
 
 if ($method === 'GET') {
+    $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+    
+    // If ID is provided, fetch single news item
+    if ($id > 0) {
+        $stmt = db()->prepare('SELECT n.*, c.name as category_name FROM news n LEFT JOIN categories c ON n.category_id = c.id WHERE n.id = ?');
+        $stmt->execute([$id]);
+        $row = $stmt->fetch();
+        
+        if (!$row) {
+            json_response(['error' => 'News not found'], 404);
+        }
+        
+        // Attach images
+        $imgStmt = db()->prepare('SELECT id, path, sort_order FROM news_images WHERE news_id = ? ORDER BY sort_order ASC');
+        $imgStmt->execute([$id]);
+        $row['images'] = $imgStmt->fetchAll();
+        
+        json_response(['item' => $row]);
+    }
+    
+    // Otherwise, fetch all news items
     $rows = db()->query('SELECT n.*, c.name as category_name FROM news n LEFT JOIN categories c ON n.category_id = c.id ORDER BY n.id DESC')->fetchAll();
     
     // Attach images to each news item

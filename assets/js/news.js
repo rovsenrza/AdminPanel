@@ -38,12 +38,20 @@ function boot() {
 
 async function loadNewsForEdit(newsId) {
     try {
-        const res = await fetch('/backend/api/news', { credentials: 'include' });
+        // Fetch single news item by ID (more efficient)
+        const res = await fetch(`/backend/api/news?id=${newsId}`, { credentials: 'include' });
+        if (!res.ok) {
+            if (res.status === 404) {
+                showAlert('News not found', 'danger');
+            } else {
+                showAlert('Failed to fetch news data', 'danger');
+            }
+            return;
+        }
         const data = await res.json();
-        const allNews = data.items || [];
-        const news = allNews.find(n => n.id === newsId);
+        const news = data.item || data; // Support both 'item' (single) and direct object
         
-        if (!news) {
+        if (!news || !news.id) {
             showAlert('News not found', 'danger');
             return;
         }
@@ -57,29 +65,57 @@ async function loadNewsForEdit(newsId) {
         document.getElementById('newsMetaDesc').value = news.meta_description || '';
         document.getElementById('newsMetaKeywords').value = news.meta_keywords || '';
         
-        // Set category after categories are loaded
-        setTimeout(() => {
+        // Set category after categories are loaded - wait for categories to be loaded
+        const setCategorySelection = () => {
             const categorySelect = document.getElementById('newsCategory');
-            if (categorySelect && news.category_ids) {
-                // Multi-category support
-                const catIds = news.category_ids.split(',').map(id => parseInt(id.trim()));
-                Array.from(categorySelect.options).forEach(opt => {
-                    opt.selected = catIds.includes(parseInt(opt.value));
-                });
-            } else if (categorySelect && news.category_id) {
-                categorySelect.value = news.category_id;
+            if (!categorySelect) {
+                setTimeout(setCategorySelection, 100);
+                return;
             }
-        }, 500);
+            
+            // Wait for categories to be populated
+            if (categorySelect.options.length <= 1) {
+                setTimeout(setCategorySelection, 100);
+                return;
+            }
+            
+            if (news.category_ids) {
+                // Multi-category support
+                const catIds = news.category_ids.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
+                Array.from(categorySelect.options).forEach(opt => {
+                    const optValue = parseInt(opt.value);
+                    opt.selected = catIds.includes(optValue);
+                });
+            } else if (news.category_id) {
+                // Single category support (backward compatibility)
+                const catId = parseInt(news.category_id);
+                categorySelect.value = catId.toString();
+            }
+        };
+        
+        // Try immediately, then retry if needed
+        setCategorySelection();
+        setTimeout(setCategorySelection, 500);
+        setTimeout(setCategorySelection, 1000);
         
         // Set editor content after editors are initialized
-        setTimeout(() => {
+        const setEditorContent = () => {
             if (shortDescriptionEditor && news.short_desc_html) {
                 shortDescriptionEditor.root.innerHTML = news.short_desc_html;
             }
             if (fullDescriptionEditor && news.full_desc_html) {
                 fullDescriptionEditor.root.innerHTML = news.full_desc_html;
             }
-        }, 300);
+        };
+        
+        // Try immediately, then retry if editors aren't ready
+        if (shortDescriptionEditor && fullDescriptionEditor) {
+            setEditorContent();
+        } else {
+            setTimeout(setEditorContent, 300);
+            setTimeout(setEditorContent, 600);
+            setTimeout(setEditorContent, 1000);
+        }
         
         // Load existing images
         if (news.images && news.images.length > 0) {
@@ -404,7 +440,7 @@ function addImageInput() {
     container.appendChild(newInput);
 }
 
-function previewImage(input) {
+window.previewImage = function(input) {
     if (!input.files || !input.files[0]) return;
     
     const file = input.files[0];
@@ -415,59 +451,73 @@ function previewImage(input) {
     }
     
     const reader = new FileReader();
+    
     reader.onload = function(e) {
+        const previewContainer = document.getElementById('imagePreviewContainer');
+        if (!previewContainer) return;
+        
+        const previewDiv = document.createElement('div');
+        previewDiv.className = 'image-preview';
+        previewDiv.setAttribute('data-file-index', imagePreviews.length);
+        previewDiv.innerHTML = `
+            <img src="${e.target.result}" alt="Preview">
+            <button type="button" class="image-preview-remove" onclick="removeImagePreview(this)">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        previewContainer.appendChild(previewDiv);
+        
+        // Store file object for upload
         imagePreviews.push({
             file: file,
             dataUrl: e.target.result
         });
+        
+        // Show remove button on the input group
+        const inputGroup = input.closest('.image-input-group');
+        if (inputGroup) {
+            const removeBtn = inputGroup.querySelector('button');
+            if (removeBtn) removeBtn.style.display = 'block';
+        }
     };
+    
     reader.readAsDataURL(file);
 }
 
-function removeImageInput(btn) {
-    const group = btn.closest('.image-input-group');
+window.removeImageInput = function(button) {
+    const group = button.closest('.image-input-group');
+    if (!group) return;
+    
     const index = Array.from(group.parentElement.children).indexOf(group);
     if (index >= 0 && index < imagePreviews.length) {
         imagePreviews.splice(index, 1);
     }
+    
     group.remove();
+    
+    // Update data-file-index attributes after removal
+    const previews = document.querySelectorAll('.image-preview');
+    previews.forEach((preview, idx) => {
+        preview.setAttribute('data-file-index', idx);
+    });
 }
 
-function removeImageInput(button) {
-    button.closest('.image-input-group').remove();
-}
-
-function previewImage(input) {
-    if (input.files && input.files[0]) {
-        const file = input.files[0];
-        
-        if (!validateImageSize(file, 400)) {
-            input.value = '';
-            return;
-        }
-        
-        const reader = new FileReader();
-        
-        reader.onload = function(e) {
-            const previewContainer = document.getElementById('imagePreviewContainer');
-            const previewDiv = document.createElement('div');
-            previewDiv.className = 'image-preview';
-            previewDiv.innerHTML = `
-                <img src="${e.target.result}" alt="Preview">
-                <button type="button" class="image-preview-remove" onclick="removeImagePreview(this)">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
-            previewContainer.appendChild(previewDiv);
-            imagePreviews.push(e.target.result);
-        };
-        
-        reader.readAsDataURL(file);
+window.removeImagePreview = function(button) {
+    const previewDiv = button.closest('.image-preview');
+    if (!previewDiv) return;
+    
+    const fileIndex = parseInt(previewDiv.getAttribute('data-file-index'));
+    if (!isNaN(fileIndex) && fileIndex >= 0 && fileIndex < imagePreviews.length) {
+        imagePreviews.splice(fileIndex, 1);
     }
-}
-
-function removeImagePreview(button) {
-    button.closest('.image-preview').remove();
+    
+    previewDiv.remove();
+    
+    // Update data-file-index attributes after removal
+    const previews = document.querySelectorAll('.image-preview:not(.existing-image)');
+    previews.forEach((preview, idx) => {
+        preview.setAttribute('data-file-index', idx);
+    });
 }
 
 function addExtraField() {

@@ -68,7 +68,7 @@ function renderCategoryTree(cat, level, childrenByParent) {
 }
 
 function renderCategoryItem(cat, level) {
-    const parentName = cat.parent_id ? categories.find(c => c.id === cat.parent_id)?.name : null;
+    const parentName = cat.parent_id ? categories.find(c => parseInt(c.id) === parseInt(cat.parent_id))?.name : null;
     const isChild = level > 0;
     const indentStyle = isChild ? ` style="margin-left:${level * 2}rem"` : '';
     return `
@@ -106,6 +106,7 @@ function initSortable() {
     if (sortable) {
         sortable.destroy();
     }
+    
     
     sortable = Sortable.create(categoryList, {
         animation: 150,
@@ -209,8 +210,15 @@ function addChildOptionsToDropdown(select, parentId, allCategories, level) {
 }
 
 window.editCategory = function(id) {
-    const cat = categories.find(c => c.id === id);
-    if (!cat) return;
+    // Convert id to number for consistent comparison
+    const categoryId = parseInt(id);
+    const cat = categories.find(c => parseInt(c.id) === categoryId);
+    
+    if (!cat) {
+        console.error('Category not found:', id, 'Available categories:', categories.map(c => c.id));
+        showAlert('Category not found', 'danger');
+        return;
+    }
     
     const nameInput = document.getElementById('editCategoryName');
     const slugInput = document.getElementById('editCategorySlug');
@@ -218,22 +226,41 @@ window.editCategory = function(id) {
     const metaDescInput = document.getElementById('editCategoryMetaDesc');
     const metaKeywordsInput = document.getElementById('editCategoryMetaKeywords');
     
+    if (!nameInput || !slugInput) {
+        console.error('Required form fields not found');
+        showAlert('Error: Form fields not found', 'danger');
+        return;
+    }
+    
     nameInput.value = cat.name || '';
     slugInput.value = cat.slug || '';
     
+    // Update parent dropdown before setting value
     updateParentDropdowns();
-    const parentSelect = document.getElementById('editCategoryParent');
-    // Remove self from parent options
-    const selfOption = parentSelect.querySelector(`option[value="${id}"]`);
-    if (selfOption) selfOption.remove();
-    parentSelect.value = cat.parent_id || '';
+    
+    // Wait a bit for dropdown to be populated
+    setTimeout(() => {
+        const parentSelect = document.getElementById('editCategoryParent');
+        if (parentSelect) {
+            // Remove self from parent options to prevent circular references
+            const selfOption = parentSelect.querySelector(`option[value="${categoryId}"]`);
+            if (selfOption) selfOption.remove();
+            parentSelect.value = cat.parent_id ? String(cat.parent_id) : '';
+        }
+    }, 100);
     
     metaTitleInput.value = cat.meta_title || '';
     metaDescInput.value = cat.meta_description || '';
     metaKeywordsInput.value = cat.meta_keywords || '';
     
     const modal = document.getElementById('editCategoryModal');
-    modal.setAttribute('data-edit-id', id);
+    if (!modal) {
+        console.error('Edit category modal not found');
+        showAlert('Error: Edit modal not found', 'danger');
+        return;
+    }
+    
+    modal.setAttribute('data-edit-id', categoryId);
     modal.setAttribute('data-original-slug', cat.slug || '');
     
     // Remove old event listeners by cloning and replacing
@@ -245,18 +272,40 @@ window.editCategory = function(id) {
     newNameInput.addEventListener('input', function() {
         const name = this.value.trim();
         // Auto-generate slug from name
-        document.getElementById('editCategorySlug').value = generateSlug(name);
+        const slugField = document.getElementById('editCategorySlug');
+        if (slugField) slugField.value = generateSlug(name);
         // Auto-generate meta title
-        document.getElementById('editCategoryMetaTitle').value = name;
+        const metaTitleField = document.getElementById('editCategoryMetaTitle');
+        if (metaTitleField) metaTitleField.value = name;
         // Auto-generate meta description
-        document.getElementById('editCategoryMetaDesc').value = name ? `Browse all articles in ${name} category` : '';
+        const metaDescField = document.getElementById('editCategoryMetaDesc');
+        if (metaDescField) metaDescField.value = name ? `Browse all articles in ${name} category` : '';
         // Auto-generate meta keywords
-        document.getElementById('editCategoryMetaKeywords').value = name ? generateKeywordsFromName(name) : '';
+        const metaKeywordsField = document.getElementById('editCategoryMetaKeywords');
+        if (metaKeywordsField) metaKeywordsField.value = name ? generateKeywordsFromName(name) : '';
     });
     
     // Use Bootstrap modal
-    const bsModal = new bootstrap.Modal(modal);
-    bsModal.show();
+    try {
+        // Hide any existing modal instances first
+        const existingModal = bootstrap.Modal.getInstance(modal);
+        if (existingModal) {
+            existingModal.hide();
+        }
+        
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+    } catch (err) {
+        console.error('Error opening modal:', err);
+        // Fallback: manually show modal if Bootstrap fails
+        modal.classList.add('show');
+        modal.style.display = 'block';
+        document.body.classList.add('modal-open');
+        const backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop fade show';
+        backdrop.id = 'modalBackdrop';
+        document.body.appendChild(backdrop);
+    }
 }
 
 function generateKeywordsFromName(name) {
@@ -266,14 +315,41 @@ function generateKeywordsFromName(name) {
 
 window.saveCategoryEdit = async function() {
     const modal = document.getElementById('editCategoryModal');
-    const id = parseInt(modal.getAttribute('data-edit-id'));
+    if (!modal) {
+        showAlert('Error: Modal not found', 'danger');
+        return;
+    }
     
-    const name = document.getElementById('editCategoryName').value.trim();
-    const slug = document.getElementById('editCategorySlug').value.trim();
-    const parent = document.getElementById('editCategoryParent').value;
-    const metaTitle = document.getElementById('editCategoryMetaTitle').value.trim();
-    const metaDesc = document.getElementById('editCategoryMetaDesc').value.trim();
-    const metaKeywords = document.getElementById('editCategoryMetaKeywords').value.trim();
+    const idStr = modal.getAttribute('data-edit-id');
+    if (!idStr) {
+        showAlert('Error: Category ID not found', 'danger');
+        return;
+    }
+    
+    const id = parseInt(idStr);
+    if (isNaN(id) || id <= 0) {
+        showAlert('Error: Invalid category ID', 'danger');
+        return;
+    }
+    
+    const nameInput = document.getElementById('editCategoryName');
+    const slugInput = document.getElementById('editCategorySlug');
+    const parentSelect = document.getElementById('editCategoryParent');
+    const metaTitleInput = document.getElementById('editCategoryMetaTitle');
+    const metaDescInput = document.getElementById('editCategoryMetaDesc');
+    const metaKeywordsInput = document.getElementById('editCategoryMetaKeywords');
+    
+    if (!nameInput || !slugInput) {
+        showAlert('Error: Required form fields not found', 'danger');
+        return;
+    }
+    
+    const name = nameInput.value.trim();
+    const slug = slugInput.value.trim();
+    const parent = parentSelect ? parentSelect.value : '';
+    const metaTitle = metaTitleInput ? metaTitleInput.value.trim() : '';
+    const metaDesc = metaDescInput ? metaDescInput.value.trim() : '';
+    const metaKeywords = metaKeywordsInput ? metaKeywordsInput.value.trim() : '';
     
     if (!name) {
         showAlert('Please enter a category name', 'danger');
@@ -296,22 +372,46 @@ window.saveCategoryEdit = async function() {
         });
         
         if (res.ok) {
-            bootstrap.Modal.getInstance(modal).hide();
+            // Hide modal properly
+            try {
+                const bsModal = bootstrap.Modal.getInstance(modal);
+                if (bsModal) {
+                    bsModal.hide();
+                } else {
+                    // Fallback: manually hide modal
+                    modal.classList.remove('show');
+                    modal.style.display = 'none';
+                    document.body.classList.remove('modal-open');
+                    const backdrop = document.getElementById('modalBackdrop');
+                    if (backdrop) backdrop.remove();
+                }
+            } catch (modalErr) {
+                console.error('Error hiding modal:', modalErr);
+            }
+            
             showAlert('Category updated successfully!', 'success');
             await loadCategories();
         } else {
-            showAlert('Failed to update category', 'danger');
+            const errorData = await res.json().catch(() => ({}));
+            showAlert(errorData.error || 'Failed to update category', 'danger');
         }
     } catch (err) {
-        showAlert('Error updating category', 'danger');
+        console.error('Error updating category:', err);
+        showAlert('Error updating category: ' + err.message, 'danger');
     }
 }
 
 window.deleteCategory = async function(id) {
     if (!confirm('Are you sure you want to delete this category?')) return;
     
+    const categoryId = parseInt(id);
+    if (isNaN(categoryId) || categoryId <= 0) {
+        showAlert('Error: Invalid category ID', 'danger');
+        return;
+    }
+    
     try {
-        const res = await fetch(`/backend/api/categories?id=${id}`, {
+        const res = await fetch(`/backend/api/categories?id=${categoryId}`, {
             method: 'DELETE',
             credentials: 'include'
         });
@@ -320,10 +420,11 @@ window.deleteCategory = async function(id) {
             showAlert('Category deleted successfully!', 'success');
             await loadCategories();
         } else {
-            const data = await res.json();
+            const data = await res.json().catch(() => ({}));
             showAlert(data.error || 'Failed to delete category', 'danger');
         }
     } catch (err) {
-        showAlert('Error deleting category', 'danger');
+        console.error('Error deleting category:', err);
+        showAlert('Error deleting category: ' + err.message, 'danger');
     }
 }
