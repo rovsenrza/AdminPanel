@@ -1,7 +1,7 @@
 # Admin Panel Root .htaccess
 DirectoryIndex main.html
 # Prevent directory listing
-Options -Indexes
+# Options -Indexes
 
 # Enable URL rewriting
 RewriteEngine On
