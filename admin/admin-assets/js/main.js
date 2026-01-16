@@ -12,20 +12,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function initAuthGuard() {
     const path = window.location.pathname || '';
-    if (path.endsWith('/login.html') || path.endsWith('login.html')) {
+    if (path.endsWith('/admin/login') || path.endsWith('login.html')) {
         return;
     }
 
     fetch('/backend/api/me', { credentials: 'include' })
         .then(res => {
             if (!res.ok || res.status === 401) {
-                window.location.href = '/login.html';
+                window.location.href = '/admin/login';
                 return null;
             }
             return res.json();
         })
         .catch(() => {
-            window.location.href = '/login.html';
+            window.location.href = '/admin/login';
         });
 }
 
@@ -48,7 +48,7 @@ function initLogout() {
             } catch (err) {
                 // ignore
             }
-            window.location.href = '/login.html';
+            window.location.href = '/admin/login';
         });
     });
 }

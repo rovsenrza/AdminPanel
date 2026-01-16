@@ -13,7 +13,7 @@
     <div class="layout-wrapper">
         <aside class="layout-menu">
             <div class="app-brand">
-                <a href="index.html" class="app-brand-logo">
+                <a href="dashboard" class="app-brand-logo">
                     <i class="fas fa-cube"></i>
                     <span>Admin Panel</span>
                 </a>
@@ -27,7 +27,7 @@
                     <li class="menu-header">Main</li>
                     
                     <li class="menu-item">
-                        <a href="index.html" class="menu-link">
+                        <a href="dashboard" class="menu-link">
                             <i class="menu-icon fas fa-home"></i>
                             <span>Dashboard</span>
                         </a>
@@ -43,12 +43,12 @@
                         </a>
                         <ul class="menu-sub">
                             <li class="menu-item">
-                                <a href="categories.html" class="menu-link">
+                                <a href="categories" class="menu-link">
                                     <span>All Categories</span>
                                 </a>
                             </li>
                             <li class="menu-item">
-                                <a href="categories-add.html" class="menu-link">
+                                <a href="categories-add" class="menu-link">
                                     <span>Add Category</span>
                                 </a>
                             </li>
@@ -63,12 +63,12 @@
                         </a>
                         <ul class="menu-sub">
                             <li class="menu-item">
-                                <a href="news.html" class="menu-link active">
+                                <a href="news" class="menu-link active">
                                     <span>All News</span>
                                 </a>
                             </li>
                             <li class="menu-item">
-                                <a href="news-add.html" class="menu-link">
+                                <a href="news-add" class="menu-link">
                                     <span>Add News</span>
                                 </a>
                             </li>
@@ -78,14 +78,14 @@
                     <li class="menu-header">System</li>
 
                     <li class="menu-item">
-                        <a href="settings.html" class="menu-link">
+                        <a href="settings" class="menu-link">
                             <i class="menu-icon fas fa-cog"></i>
                             <span>Settings</span>
                         </a>
                     </li>
 
                     <li class="menu-item">
-                        <a href="profile.html" class="menu-link">
+                        <a href="profile" class="menu-link">
                             <i class="menu-icon fas fa-user"></i>
                             <span>Profile</span>
                         </a>
@@ -121,7 +121,7 @@
                             </button>
                         </li>
                         <li class="nav-item">
-                            <a href="profile.html" class="user-avatar">
+                            <a href="profile" class="user-avatar">
                                 <span>AD</span>
                             </a>
                         </li>
@@ -135,7 +135,7 @@
                         <h1 class="page-title">News</h1>
                         <nav aria-label="breadcrumb">
                             <ol class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a href="dashboard">Dashboard</a></li>
                                 <li class="breadcrumb-item active">News</li>
                             </ol>
                         </nav>
@@ -144,7 +144,7 @@
                     <div class="card">
                         <div class="card-header">
                             <h5 class="card-title">All News</h5>
-                            <a href="news-add.html" class="btn btn-primary">
+                            <a href="news-add" class="btn btn-primary">
                                 <i class="fas fa-plus"></i> Add News
                             </a>
                         </div>
@@ -207,7 +207,7 @@
                 const news = data.items || [];
                 
                 if (news.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No news articles yet. <a href="news-add.html">Add your first news</a></td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No news articles yet. <a href="news-add">Add your first news</a></td></tr>';
                     return;
                 }
                 
@@ -235,7 +235,7 @@
                             <td><span class="badge ${item.published ? 'badge-success' : 'badge-secondary'}">${item.published ? 'Published' : 'Draft'}</span></td>
                             <td>${item.created_at ? item.created_at.split(' ')[0] : '-'}</td>
                             <td>
-                                <a href="news-add.html?id=${item.id}" class="btn btn-sm btn-primary btn-icon">
+                                <a href="news-add?id=${item.id}" class="btn btn-sm btn-primary btn-icon">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <button class="btn btn-sm btn-danger btn-icon" onclick="deleteNews(${item.id})">

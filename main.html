@@ -312,6 +312,66 @@
                     `;
                 }
             }
+
+            // Logo Path
+            if (settings.logo_path) {
+                html += `
+                    <div class="setting-item">
+                        <div class="setting-label">Logo Path</div>
+                        <div class="setting-value">${escapeHtml(settings.logo_path)}</div>
+                    </div>
+                `;
+            }
+
+            // Telegram Link
+            if (settings.telegram_link) {
+                html += `
+                    <div class="setting-item">
+                        <div class="setting-label">Telegram Link</div>
+                        <div class="setting-value"><a href="${escapeHtml(settings.telegram_link)}" target="_blank">${escapeHtml(settings.telegram_link)}</a></div>
+                    </div>
+                `;
+            }
+
+            // WhatsApp Number
+            if (settings.whatsapp_number) {
+                html += `
+                    <div class="setting-item">
+                        <div class="setting-label">WhatsApp Number</div>
+                        <div class="setting-value">${escapeHtml(settings.whatsapp_number)}</div>
+                    </div>
+                `;
+            }
+
+            // GA ID
+            if (settings.ga_id) {
+                html += `
+                    <div class="setting-item">
+                        <div class="setting-label">Google Analytics ID</div>
+                        <div class="setting-value">${escapeHtml(settings.ga_id)}</div>
+                    </div>
+                `;
+            }
+
+            // GSC Verification
+            if (settings.gsc_verification) {
+                html += `
+                    <div class="setting-item">
+                        <div class="setting-label">GSC Verification</div>
+                        <div class="setting-value">${escapeHtml(settings.gsc_verification)}</div>
+                    </div>
+                `;
+            }
+
+            // API Key (Masked)
+            if (settings.api_key) {
+                html += `
+                    <div class="setting-item">
+                        <div class="setting-label">API Key</div>
+                        <div class="setting-value"><code>${escapeHtml(settings.api_key.substring(0, 10) + '...')}</code></div>
+                    </div>
+                `;
+            }
             
             html += '</div>';
             container.innerHTML = html;
