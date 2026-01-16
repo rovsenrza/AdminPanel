@@ -125,12 +125,6 @@ CREATE TABLE `settings` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Tablo döküm verisi `settings`
---
-
-INSERT INTO `settings` (`id`, `site_title`, `domain`, `logo_path`, `language`, `news_per_page`, `maintenance`, `seo_default_title`, `seo_default_description`, `seo_default_keywords`, `ga_id`, `gsc_verification`, `social_links_json`, `telegram_link`, `whatsapp_number`, `api_key`, `api_secret`, `created_at`, `updated_at`) VALUES
-(1, 'Site Name', 'sitedomain.com', '/uploads/logo/logo_69696675455e56.56457913.jpg', 'en', 15, 0, '', '', '', '', '', '{\"facebook\":\"\",\"twitter\":\"\",\"instagram\":\"\",\"youtube\":\"\"}', '', '', '0cf91480ab608f6562ddc5d4494d2f17bc1b4d3b71269539e538aafa71e134e5', 'd20c27653ca08f5a99d5e15a020634e09467a730fe345e2e4a82e682da427cd9', '2026-01-15 12:59:14', '2026-01-15 22:13:09');
 
 -- --------------------------------------------------------
 
@@ -149,13 +143,6 @@ CREATE TABLE `users` (
   `created_at` timestamp NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Tablo döküm verisi `users`
---
-
-INSERT INTO `users` (`id`, `username`, `email`, `phone`, `password_hash`, `remember_token`, `remember_expiry`, `created_at`, `updated_at`) VALUES
-(1, 'admin', 'admin@mail.ru', '', '$2y$10$6LvyK20hPckvZXCeQiNv/OydsqfJ.qthn49pUu/APsF1N8V1uawAK', NULL, NULL, '2026-01-15 13:50:09', '2026-01-15 22:14:42');
 
 --
 -- Dökümü yapılmış tablolar için indeksler
