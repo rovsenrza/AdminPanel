@@ -22,5 +22,5 @@ if (!$user) {
     exit;
 }
 
-header('Location: /admin/dashboard');
+header('Location: /admin');
 exit;
