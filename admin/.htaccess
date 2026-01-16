@@ -1,0 +1,2 @@
+# Allow direct access to HTML files in admin directory
+DirectoryIndex index.html

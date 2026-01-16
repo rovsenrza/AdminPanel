@@ -41,7 +41,7 @@
     inline-size: 148px;
     inset-block-start: -40px;
     inset-inline-end: -30px;
-    mask-image: url('/assets/admin/img/decor1.svg');
+    mask-image: url('/admin/admin-assets/img/decor1.svg');
     -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
     -webkit-mask-size: 100% 100%;
@@ -59,7 +59,7 @@
     inline-size: 148px;
     inset-block-end: -45px;
     inset-inline-start: -35px;
-    mask-image: url('/assets/admin/img/decor2.svg');
+    mask-image: url('/admin/admin-assets/img/decor2.svg');
     -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
     -webkit-mask-size: 100% 100%;

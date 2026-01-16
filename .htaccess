@@ -1,17 +1,13 @@
+# Root .htaccess for Admin Panel
 DirectoryIndex main.html
+
 RewriteEngine On
 
-# Static assets
-RewriteCond %{REQUEST_FILENAME} -f
-RewriteRule ^(admin/admin-assets|uploads)/ - [L]
-
-# Backend routing
+# Handle backend routing - route ALL /backend/* to index.php
 RewriteCond %{REQUEST_URI} ^/backend/
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^backend/(.*)$ backend/index.php [QSA,L]
 
-# Admin routing
+# Admin clean URLs
 RewriteRule ^admin/?$ admin/index.html [L]
 RewriteRule ^admin/login/?$ admin/login.html [L]
 
