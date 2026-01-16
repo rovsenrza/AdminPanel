@@ -1,27 +1,17 @@
-# Admin Panel Root .htaccess
 DirectoryIndex main.html
-
-# Enable URL rewriting
 RewriteEngine On
 
-# Allow access to static assets
 RewriteCond %{REQUEST_FILENAME} -f
-RewriteRule ^(admin/admin-assets|uploads)/.*$ - [L]
+RewriteRule ^(admin/admin-assets|uploads)/ - [L]
 
-# Route /backend/* requests to backend/index.php
 RewriteCond %{REQUEST_URI} ^/backend/
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^backend/(.*)$ backend/index.php [QSA,L]
 
-# --- Admin Panel Routes ---
-# /admin -> admin/index.html
 RewriteRule ^admin/?$ admin/index.html [L]
-
-# /admin/login -> admin/login.html
 RewriteRule ^admin/login/?$ admin/login.html [L]
 
-# /admin/page -> admin/page.html
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} ^/admin/
