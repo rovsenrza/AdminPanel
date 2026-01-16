@@ -239,7 +239,8 @@
                 return '<span class="text-muted">N/A</span>';
             }
             if (key === 'maintenance') {
-                return value ? '<span class="badge bg-danger">ON</span>' : '<span class="badge bg-success">OFF</span>';
+                const isOn = value === true || value === 1 || value === '1';
+                return isOn ? '<span class="badge bg-danger">ON</span>' : '<span class="badge bg-success">OFF</span>';
             }
             if (key === 'social_links' && typeof value === 'object') {
                 const links = Object.entries(value)

@@ -18,5 +18,9 @@ if ($row && $row['social_links_json']) {
     $row['social_links'] = json_decode($row['social_links_json'], true);
     unset($row['social_links_json']);
 }
+if ($row) {
+    $row['maintenance'] = (int)($row['maintenance'] ?? 0);
+    $row['news_per_page'] = (int)($row['news_per_page'] ?? 0);
+}
 
 json_response(['settings' => $row ?: null]);
