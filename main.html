@@ -129,6 +129,15 @@
             color: #666;
             margin-top: 5px;
         }
+        .json-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 0.85em;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
     </style>
 </head>
 <body>
@@ -213,6 +222,43 @@
             }
         }
 
+        function safeStringify(value) {
+            try {
+                return JSON.stringify(value, null, 2);
+            } catch (e) {
+                return String(value);
+            }
+        }
+
+        function renderJsonBlock(value) {
+            return `<pre class="json-block">${escapeHtml(safeStringify(value))}</pre>`;
+        }
+
+        function formatValue(key, value) {
+            if (value === null || value === undefined || value === '') {
+                return '<span class="text-muted">N/A</span>';
+            }
+            if (key === 'maintenance') {
+                return value ? '<span class="badge bg-danger">ON</span>' : '<span class="badge bg-success">OFF</span>';
+            }
+            if (key === 'social_links' && typeof value === 'object') {
+                const links = Object.entries(value)
+                    .filter(([, v]) => v)
+                    .map(([k, v]) => `<a href="${escapeHtml(v)}" target="_blank" class="social-link">${escapeHtml(k)}</a>`)
+                    .join('');
+                const json = renderJsonBlock(value);
+                return `${links || ''}${links ? '<div class="mt-2"></div>' : ''}${json}`;
+            }
+            if (typeof value === 'object') {
+                return renderJsonBlock(value);
+            }
+            const str = String(value);
+            if (str.startsWith('http://') || str.startsWith('https://')) {
+                return `<a href="${escapeHtml(str)}" target="_blank">${escapeHtml(str)}</a>`;
+            }
+            return escapeHtml(str);
+        }
+
         // Load Settings
         async function loadSettings() {
             const container = document.getElementById('settingsContainer');
@@ -231,146 +277,14 @@
             }
             
             let html = '<div class="settings-grid">';
-            
-            // Site Title
-            if (settings.site_title) {
+            Object.entries(settings).forEach(([key, value]) => {
                 html += `
                     <div class="setting-item">
-                        <div class="setting-label">Site Title</div>
-                        <div class="setting-value">${escapeHtml(settings.site_title)}</div>
+                        <div class="setting-label">${escapeHtml(key)}</div>
+                        <div class="setting-value">${formatValue(key, value)}</div>
                     </div>
                 `;
-            }
-            
-            // Domain
-            if (settings.domain) {
-                html += `
-                    <div class="setting-item">
-                        <div class="setting-label">Domain</div>
-                        <div class="setting-value">${escapeHtml(settings.domain)}</div>
-                    </div>
-                `;
-            }
-            
-            // Language
-            if (settings.language) {
-                html += `
-                    <div class="setting-item">
-                        <div class="setting-label">Language</div>
-                        <div class="setting-value">${escapeHtml(settings.language)}</div>
-                    </div>
-                `;
-            }
-            
-            // SEO Default Title
-            if (settings.seo_default_title) {
-                html += `
-                    <div class="setting-item">
-                        <div class="setting-label">SEO Default Title</div>
-                        <div class="setting-value">${escapeHtml(settings.seo_default_title)}</div>
-                    </div>
-                `;
-            }
-            
-            // SEO Default Description
-            if (settings.seo_default_description) {
-                html += `
-                    <div class="setting-item">
-                        <div class="setting-label">SEO Default Description</div>
-                        <div class="setting-value">${escapeHtml(settings.seo_default_description)}</div>
-                    </div>
-                `;
-            }
-            
-            // SEO Default Keywords
-            if (settings.seo_default_keywords) {
-                html += `
-                    <div class="setting-item">
-                        <div class="setting-label">SEO Default Keywords</div>
-                        <div class="setting-value">${escapeHtml(settings.seo_default_keywords)}</div>
-                    </div>
-                `;
-            }
-            
-            // Social Links
-            if (settings.social_links && typeof settings.social_links === 'object') {
-                let socialHtml = '';
-                for (const [key, value] of Object.entries(settings.social_links)) {
-                    if (value) {
-                        socialHtml += `<a href="${escapeHtml(value)}" target="_blank" class="social-link">
-                            <i class="fab fa-${key}"></i> ${key.charAt(0).toUpperCase() + key.slice(1)}
-                        </a>`;
-                    }
-                }
-                if (socialHtml) {
-                    html += `
-                        <div class="setting-item" style="grid-column: 1 / -1;">
-                            <div class="setting-label">Social Links</div>
-                            <div class="setting-value">${socialHtml}</div>
-                        </div>
-                    `;
-                }
-            }
-
-            // Logo Path
-            if (settings.logo_path) {
-                html += `
-                    <div class="setting-item">
-                        <div class="setting-label">Logo Path</div>
-                        <div class="setting-value">${escapeHtml(settings.logo_path)}</div>
-                    </div>
-                `;
-            }
-
-            // Telegram Link
-            if (settings.telegram_link) {
-                html += `
-                    <div class="setting-item">
-                        <div class="setting-label">Telegram Link</div>
-                        <div class="setting-value"><a href="${escapeHtml(settings.telegram_link)}" target="_blank">${escapeHtml(settings.telegram_link)}</a></div>
-                    </div>
-                `;
-            }
-
-            // WhatsApp Number
-            if (settings.whatsapp_number) {
-                html += `
-                    <div class="setting-item">
-                        <div class="setting-label">WhatsApp Number</div>
-                        <div class="setting-value">${escapeHtml(settings.whatsapp_number)}</div>
-                    </div>
-                `;
-            }
-
-            // GA ID
-            if (settings.ga_id) {
-                html += `
-                    <div class="setting-item">
-                        <div class="setting-label">Google Analytics ID</div>
-                        <div class="setting-value">${escapeHtml(settings.ga_id)}</div>
-                    </div>
-                `;
-            }
-
-            // GSC Verification
-            if (settings.gsc_verification) {
-                html += `
-                    <div class="setting-item">
-                        <div class="setting-label">GSC Verification</div>
-                        <div class="setting-value">${escapeHtml(settings.gsc_verification)}</div>
-                    </div>
-                `;
-            }
-
-            // API Key (Masked)
-            if (settings.api_key) {
-                html += `
-                    <div class="setting-item">
-                        <div class="setting-label">API Key</div>
-                        <div class="setting-value"><code>${escapeHtml(settings.api_key.substring(0, 10) + '...')}</code></div>
-                    </div>
-                `;
-            }
+            });
             
             html += '</div>';
             container.innerHTML = html;
@@ -407,6 +321,7 @@
                                     <i class="fas fa-link"></i> ${escapeHtml(cat.slug || 'N/A')}${parentInfo}
                                 </small>
                                 ${cat.description ? `<p class="mb-0 mt-2 small">${escapeHtml(cat.description)}</p>` : ''}
+                                <div class="mt-2">${renderJsonBlock(cat)}</div>
                             </div>
                             <span class="badge bg-secondary">#${cat.id}</span>
                         </div>
@@ -420,7 +335,7 @@
         // Load News
         async function loadNews() {
             const container = document.getElementById('newsContainer');
-            const result = await fetchAPI('/public/news?page=1&per_page=20');
+            const result = await fetchAllNews(100);
             
             if (!result.success) {
                 container.innerHTML = `<div class="error">Error loading news: ${result.error}</div>`;
@@ -474,11 +389,36 @@
                                 <i class="fas fa-link"></i> Slug: <code>${escapeHtml(item.slug || 'N/A')}</code>
                             </small>
                         </div>
+                        <div class="mt-2">${renderJsonBlock(item)}</div>
                     </div>
                 `;
             });
             
             container.innerHTML = html;
+        }
+
+        async function fetchAllNews(perPage = 100) {
+            const first = await fetchAPI(`/public/news?page=1&per_page=${perPage}`);
+            if (!first.success) return first;
+            const items = [...(first.data.news || [])];
+            const totalPages = first.data.pagination?.total_pages || 1;
+            for (let page = 2; page <= totalPages; page++) {
+                const res = await fetchAPI(`/public/news?page=${page}&per_page=${perPage}`);
+                if (res.success && Array.isArray(res.data.news)) {
+                    items.push(...res.data.news);
+                }
+            }
+            return {
+                success: true,
+                data: {
+                    news: items,
+                    pagination: {
+                        ...first.data.pagination,
+                        total_pages: totalPages,
+                        total: first.data.pagination?.total || items.length
+                    }
+                }
+            };
         }
 
         // Load all data and update stats
@@ -497,11 +437,15 @@
             const statsContainer = document.getElementById('stats');
             
             // Get counts
-            const categoriesResult = await fetchAPI('/public/categories');
-            const newsResult = await fetchAPI('/public/news?page=1&per_page=1');
+            const [categoriesResult, newsResult, settingsResult] = await Promise.all([
+                fetchAPI('/public/categories'),
+                fetchAPI('/public/news?page=1&per_page=1'),
+                fetchAPI('/public/settings')
+            ]);
             
             const categoriesCount = categoriesResult.success ? (categoriesResult.data.categories || []).length : 0;
             const newsTotal = newsResult.success ? (newsResult.data.pagination?.total || 0) : 0;
+            const maintenance = settingsResult.success ? settingsResult.data.settings?.maintenance : null;
             
             statsContainer.innerHTML = `
                 <div class="stat-card">
@@ -513,12 +457,12 @@
                     <div class="stat-label">News Articles</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number">${newsResult.success && newsResult.data.settings ? '✓' : '✗'}</div>
-                    <div class="stat-label">API Status</div>
+                    <div class="stat-number">${settingsResult.success ? '✓' : '✗'}</div>
+                    <div class="stat-label">Settings API</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number">4</div>
-                    <div class="stat-label">Endpoints Tested</div>
+                    <div class="stat-number">${maintenance === null ? '—' : (maintenance ? 'ON' : 'OFF')}</div>
+                    <div class="stat-label">Maintenance</div>
                 </div>
             `;
         }

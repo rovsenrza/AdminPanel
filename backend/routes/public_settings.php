@@ -6,7 +6,10 @@ require_method('GET');
 require_api_key();
 
 $row = db()->query('
-    SELECT site_title, domain, language, seo_default_title, seo_default_description, seo_default_keywords, social_links_json
+    SELECT site_title, domain, logo_path, language, news_per_page, maintenance,
+           seo_default_title, seo_default_description, seo_default_keywords,
+           ga_id, gsc_verification, social_links_json, telegram_link, whatsapp_number, api_key,
+           created_at, updated_at
     FROM settings
     WHERE id = 1
 ')->fetch();
