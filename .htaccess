@@ -1,0 +1,21 @@
+DirectoryIndex main.html
+RewriteEngine On
+
+# Static assets
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^(admin/admin-assets|uploads)/ - [L]
+
+# Backend routing
+RewriteCond %{REQUEST_URI} ^/backend/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^backend/(.*)$ backend/index.php [QSA,L]
+
+# Admin routing
+RewriteRule ^admin/?$ admin/index.html [L]
+RewriteRule ^admin/login/?$ admin/login.html [L]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} ^/admin/
+RewriteRule ^admin/([^/]+)/?$ admin/$1.html [L]
