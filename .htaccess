@@ -1,5 +1,5 @@
 # Admin Panel Root .htaccess
-
+DirectoryIndex main.html
 # Prevent directory listing
 Options -Indexes
 
@@ -30,16 +30,13 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^backend/(.*)$ backend/index.php [QSA,L]
 
 # --- Admin Panel Routes ---
-# /admin -> admin/dashboard.html (Default dashboard)
-RewriteRule ^admin/?$ admin/dashboard.html [L]
-
-# /admin/dashboard -> admin/dashboard.html
-RewriteRule ^admin/dashboard/?$ admin/dashboard.html [L]
+# /admin -> admin/index.html
+RewriteRule ^admin/?$ admin/index.html [L]
 
 # /admin/login -> admin/login.html
 RewriteRule ^admin/login/?$ admin/login.html [L]
 
-# /admin/page -> admin/page.html (Generic handler for clean URLs)
+# /admin/page -> admin/page.html
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} ^/admin/
